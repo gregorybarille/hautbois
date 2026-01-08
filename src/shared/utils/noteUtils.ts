@@ -2,13 +2,17 @@ import { NOTE_MAP, REVERSE_NOTE_MAP, A4_FREQUENCY, A4_OFFSET, SEMITONES_PER_OCTA
 
 /**
  * Converts English note notation to French solfège
- * @param englishNote - Note in English (e.g., 'C4', 'D5')
- * @returns Note in French solfège (e.g., 'Do4', 'Ré5')
+ * @param englishNote - Note in English (e.g., 'C4', 'D#5')
+ * @returns Note in French solfège (e.g., 'Do4', 'Ré#5')
  */
 export function toFrenchNote(englishNote: string): string {
-  const noteName = englishNote[0]
-  const octave = englishNote.slice(1)
-  return `${NOTE_MAP[noteName]}${octave}`
+  // Handle notes with accidentals (e.g., 'C#4', 'Db5')
+  const match = englishNote.match(/^([A-G])(#|b)?(\d+)$/)
+  if (!match) return englishNote
+  
+  const [, noteName, accidental = '', octave] = match
+  const frenchName = NOTE_MAP[noteName]
+  return frenchName ? `${frenchName}${accidental}${octave}` : englishNote
 }
 
 /**
@@ -39,7 +43,7 @@ export function frequencyToNote(frequency: number): string {
   
   const halfSteps = SEMITONES_PER_OCTAVE * (Math.log(frequency / c0) / Math.log(2))
   const octave = Math.floor(halfSteps / SEMITONES_PER_OCTAVE)
-  const note = Math.round(halfSteps % SEMITONES_PER_OCTAVE)
+  const note = Math.round(halfSteps % SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE
   
   return `${noteNames[note]}${octave}`
 }

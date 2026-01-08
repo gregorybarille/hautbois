@@ -59,7 +59,7 @@ export function usePitchDetection() {
       detectPitch()
     } catch (error) {
       console.error('Error accessing microphone:', error)
-      setErrorMessage('microphone_error')
+      setErrorMessage('microphoneError')
       setIsListening(false)
     }
   }, [])
