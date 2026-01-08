@@ -7,6 +7,11 @@ interface NoteHelperProps {
   onBack: () => void
 }
 
+// Constants for pitch detection
+const A4_FREQUENCY = 440
+const A4_OFFSET = 4.75
+const SEMITONES_PER_OCTAVE = 12
+
 // Simplified oboe fingering chart (basic notes)
 const oboeFingeringChart: Record<string, string[]> = {
   'C4': ['Left: Thumb + 1,2,3', 'Right: 1,2,3 + Low C'],
@@ -33,11 +38,13 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
   const [selectedNote, setSelectedNote] = useState<string>('C4')
   const [isListening, setIsListening] = useState(false)
   const [detectedNote, setDetectedNote] = useState<string>('')
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const notationRef = useRef<HTMLDivElement>(null)
   const synthRef = useRef<Tone.Synth | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const detectorRef = useRef<PitchDetector<Float32Array> | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
     synthRef.current = new Tone.Synth().toDestination()
@@ -58,7 +65,10 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
   const renderNotation = () => {
     if (!notationRef.current) return
 
-    notationRef.current.innerHTML = ''
+    // Clear previous notation safely
+    while (notationRef.current.firstChild) {
+      notationRef.current.removeChild(notationRef.current.firstChild)
+    }
 
     const width = 400
     const height = 200
@@ -95,6 +105,7 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
 
   const startListening = async () => {
     try {
+      setErrorMessage('')
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       
       audioContextRef.current = new AudioContext()
@@ -107,29 +118,46 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
 
       setIsListening(true)
 
+      let lastDetectionTime = 0
+      const DETECTION_THROTTLE_MS = 100 // Throttle to 10 detections per second
+
       const detectPitch = () => {
-        if (!isListening || !analyserRef.current || !detectorRef.current) return
-
-        analyserRef.current.getFloatTimeDomainData(buffer)
-        const [frequency, clarity] = detectorRef.current.findPitch(buffer, audioContextRef.current!.sampleRate)
-
-        if (clarity > 0.9 && frequency > 0) {
-          const noteFromFreq = frequencyToNote(frequency)
-          setDetectedNote(noteFromFreq)
+        if (!isListening || !analyserRef.current || !detectorRef.current) {
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+          }
+          return
         }
 
-        requestAnimationFrame(detectPitch)
+        const now = Date.now()
+        if (now - lastDetectionTime >= DETECTION_THROTTLE_MS) {
+          analyserRef.current.getFloatTimeDomainData(buffer)
+          const [frequency, clarity] = detectorRef.current.findPitch(buffer, audioContextRef.current!.sampleRate)
+
+          if (clarity > 0.9 && frequency > 0) {
+            const noteFromFreq = frequencyToNote(frequency)
+            setDetectedNote(noteFromFreq)
+          }
+          lastDetectionTime = now
+        }
+
+        animationFrameRef.current = requestAnimationFrame(detectPitch)
       }
 
       detectPitch()
     } catch (error) {
       console.error('Error accessing microphone:', error)
-      alert('Could not access microphone. Please check permissions.')
+      setErrorMessage('Could not access microphone. Please check permissions.')
+      setIsListening(false)
     }
   }
 
   const stopListening = () => {
     setIsListening(false)
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
     if (audioContextRef.current) {
       audioContextRef.current.close()
       audioContextRef.current = null
@@ -139,14 +167,13 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
 
   const frequencyToNote = (frequency: number): string => {
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    const a4 = 440
-    const c0 = a4 * Math.pow(2, -4.75)
+    const c0 = A4_FREQUENCY * Math.pow(2, -A4_OFFSET)
     
     if (frequency < 1) return ''
     
-    const halfSteps = 12 * (Math.log(frequency / c0) / Math.log(2))
-    const octave = Math.floor(halfSteps / 12)
-    const note = Math.round(halfSteps % 12)
+    const halfSteps = SEMITONES_PER_OCTAVE * (Math.log(frequency / c0) / Math.log(2))
+    const octave = Math.floor(halfSteps / SEMITONES_PER_OCTAVE)
+    const note = Math.round(halfSteps % SEMITONES_PER_OCTAVE)
     
     return `${noteNames[note]}${octave}`
   }
@@ -207,6 +234,12 @@ const NoteHelper: React.FC<NoteHelperProps> = ({ onBack }) => {
                 <p className="text-sm text-base-content/70 mb-4">
                   Use your microphone to detect what note you're playing
                 </p>
+                
+                {errorMessage && (
+                  <div className="alert alert-error mb-4">
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
                 
                 {!isListening ? (
                   <button className="btn btn-secondary w-full" onClick={startListening}>

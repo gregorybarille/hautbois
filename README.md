@@ -1,73 +1,88 @@
-# React + TypeScript + Vite
+# 🎵 Hautbois - Oboe Practice Companion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application to help you study music and practice the oboe.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🎴 Flashcards
+Practice note recognition with two modes:
+- **Note Names**: See the note name (e.g., C4, G5) and hear it played
+- **Notes on Score**: See musical notation and identify the note
 
-## React Compiler
+Each flashcard includes:
+- Visual display (note name or musical staff)
+- Audio playback with Tone.js
+- Show/Hide answer functionality
+- Random note generation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🎼 Note Helper
+Learn oboe fingering positions:
+- Select any note from C4 to B6
+- View the note on a musical staff
+- See detailed fingering instructions
+- Play notes to hear their sound
+- **Practice Mode**: Use your microphone to detect what note you're playing and get instant feedback
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **React 18** with **TypeScript** - Modern React with full type safety
+- **Vite** - Fast build tool and dev server
+- **TailwindCSS** + **DaisyUI** - Beautiful, responsive UI components
+- **VexFlow** - Professional music notation rendering
+- **Tone.js** - Web Audio framework for playing notes
+- **Pitchy** - Real-time pitch detection from microphone input
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+- Node.js 18+ and npm
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
+The app will be available at `http://localhost:5173/`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Usage
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. **Home Screen**: Choose between Flashcards or Note Helper
+2. **Flashcards**: 
+   - Select your practice mode
+   - Click the speaker icon to hear the note
+   - Use "Show Answer" to reveal the note name
+   - Click "Next Note" for a new challenge
+3. **Note Helper**:
+   - Click any note button to see its fingering
+   - Use "Play Note" to hear the sound
+   - Enable "Start Listening" to practice with your oboe and get real-time feedback
+
+## Project Structure
+
 ```
+src/
+├── components/
+│   ├── Home.tsx          # Main menu with cards
+│   ├── Flashcards.tsx    # Flashcard practice modes
+│   └── NoteHelper.tsx    # Oboe fingering reference
+├── App.tsx               # Main app with routing
+├── main.tsx             # Entry point
+└── index.css            # Tailwind styles
+```
+
+## License
+
+MIT
+

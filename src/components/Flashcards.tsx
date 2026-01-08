@@ -51,8 +51,10 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
   const renderNotation = () => {
     if (!notationRef.current) return
 
-    // Clear previous notation
-    notationRef.current.innerHTML = ''
+    // Clear previous notation safely
+    while (notationRef.current.firstChild) {
+      notationRef.current.removeChild(notationRef.current.firstChild)
+    }
 
     const width = 400
     const height = 200
