@@ -1,88 +1,112 @@
-# 🎵 Hautbois - Oboe Practice Companion
+# 🎵 Hautbois - Compagnon de Pratique du Hautbois
 
-A modern web application to help you study music and practice the oboe.
+Application web moderne pour vous aider à étudier la musique et pratiquer le hautbois.
 
-## Features
+## Fonctionnalités
 
-### 🎴 Flashcards
-Practice note recognition with two modes:
-- **Note Names**: See the note name (e.g., C4, G5) and hear it played
-- **Notes on Score**: See musical notation and identify the note
+### 🎴 Cartes Mémoire
+Pratiquez la reconnaissance des notes avec deux modes :
+- **Noms de Notes** : Voir le nom de la note (Do4, Sol5, etc.) et l'entendre
+- **Notes sur Portée** : Voir la notation musicale et identifier la note
 
-Each flashcard includes:
-- Visual display (note name or musical staff)
-- Audio playback with Tone.js
-- Show/Hide answer functionality
-- Random note generation
+Chaque carte mémoire inclut :
+- Affichage visuel (nom de note ou portée musicale)
+- Lecture audio avec Tone.js
+- Fonctionnalité Afficher/Masquer la réponse
+- Génération aléatoire de notes
 
-### 🎼 Note Helper
-Learn oboe fingering positions:
-- Select any note from C4 to B6
-- View the note on a musical staff
-- See detailed fingering instructions
-- Play notes to hear their sound
-- **Practice Mode**: Use your microphone to detect what note you're playing and get instant feedback
+### 🎼 Aide aux Notes
+Apprenez les positions de doigté du hautbois :
+- Sélectionnez n'importe quelle note de Do4 à Si6
+- Visualisez la note sur une portée musicale
+- Consultez les instructions de doigté détaillées
+- Jouez les notes pour entendre leur son
+- **Mode Pratique** : Utilisez votre microphone pour détecter la note que vous jouez et obtenez un retour instantané
 
-## Tech Stack
+## Stack Technique
 
-- **React 18** with **TypeScript** - Modern React with full type safety
-- **Vite** - Fast build tool and dev server
-- **TailwindCSS** + **DaisyUI** - Beautiful, responsive UI components
-- **VexFlow** - Professional music notation rendering
-- **Tone.js** - Web Audio framework for playing notes
-- **Pitchy** - Real-time pitch detection from microphone input
+- **React 18** avec **TypeScript** - React moderne avec sécurité de type complète
+- **Vite** - Outil de build et serveur de développement rapide
+- **TailwindCSS** + **DaisyUI** - Composants UI élégants et réactifs
+- **VexFlow** - Rendu professionnel de notation musicale
+- **Tone.js** - Framework Web Audio pour jouer des notes
+- **Pitchy** - Détection de hauteur en temps réel depuis le microphone
+- **i18next** - Internationalisation (français par défaut)
 
-## Getting Started
+## Démarrage
 
-### Prerequisites
-- Node.js 18+ and npm
+### Prérequis
+- Node.js 18+ et npm
 
 ### Installation
 
 ```bash
-# Install dependencies
+# Installer les dépendances
 npm install
 
-# Start development server
+# Démarrer le serveur de développement
 npm run dev
 
-# Build for production
+# Construire pour la production
 npm run build
 
-# Preview production build
+# Prévisualiser la build de production
 npm run preview
 ```
 
-### Development
-The app will be available at `http://localhost:5173/`
+### Développement
+L'application sera disponible sur `http://localhost:5173/`
 
-## Usage
+## Utilisation
 
-1. **Home Screen**: Choose between Flashcards or Note Helper
-2. **Flashcards**: 
-   - Select your practice mode
-   - Click the speaker icon to hear the note
-   - Use "Show Answer" to reveal the note name
-   - Click "Next Note" for a new challenge
-3. **Note Helper**:
-   - Click any note button to see its fingering
-   - Use "Play Note" to hear the sound
-   - Enable "Start Listening" to practice with your oboe and get real-time feedback
+1. **Écran d'Accueil** : Choisissez entre Cartes Mémoire ou Aide aux Notes
+2. **Cartes Mémoire** : 
+   - Sélectionnez votre mode de pratique
+   - Cliquez sur l'icône haut-parleur pour entendre la note
+   - Utilisez "Afficher la Réponse" pour révéler le nom de la note
+   - Cliquez sur "Note Suivante" pour un nouveau défi
+3. **Aide aux Notes** :
+   - Cliquez sur n'importe quel bouton de note pour voir son doigté
+   - Utilisez "Jouer la Note" pour entendre le son
+   - Activez "Commencer l'Écoute" pour pratiquer avec votre hautbois et obtenir un retour en temps réel
 
-## Project Structure
+## Structure du Projet
+
+L'application utilise une **architecture basée sur les fonctionnalités** pour une meilleure organisation et maintenabilité.
 
 ```
 src/
-├── components/
-│   ├── Home.tsx          # Main menu with cards
-│   ├── Flashcards.tsx    # Flashcard practice modes
-│   └── NoteHelper.tsx    # Oboe fingering reference
-├── App.tsx               # Main app with routing
-├── main.tsx             # Entry point
-└── index.css            # Tailwind styles
+├── features/             # Fonctionnalités principales
+│   ├── home/            # Menu principal
+│   ├── flashcards/      # Cartes mémoire
+│   └── note-helper/     # Aide aux doigtés
+├── shared/              # Code partagé
+│   ├── hooks/          # Hooks React personnalisés
+│   ├── utils/          # Fonctions utilitaires
+│   └── constants/      # Constantes
+├── i18n/               # Configuration i18n
+├── App.tsx             # Composant principal
+├── main.tsx            # Point d'entrée
+└── index.css           # Styles Tailwind
 ```
 
-## License
+Voir [ARCHITECTURE.md](./ARCHITECTURE.md) pour plus de détails sur l'organisation du code.
+
+## Internationalisation
+
+L'application utilise `i18next` et `react-i18next` pour la gestion des traductions.
+
+- **Langue par défaut** : Français
+- **Notation musicale** : Solfège français (Do, Ré, Mi, Fa, Sol, La, Si)
+- **Structure extensible** : Prête pour l'ajout de nouvelles langues
+
+### Ajouter une Traduction
+
+1. Créer un nouveau fichier dans `src/i18n/locales/` (ex: `en.ts`)
+2. Ajouter les traductions dans le même format que `fr.ts`
+3. Importer et ajouter dans `src/i18n/config.ts`
+
+## Licence
 
 MIT
 

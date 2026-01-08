@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Renderer, Stave, StaveNote, Formatter, Voice } from 'vexflow'
-import * as Tone from 'tone'
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNotation } from '../../shared/hooks/useNotation'
+import { useAudioSynth } from '../../shared/hooks/useAudioSynth'
+import { getDisplayNoteName } from '../../shared/utils/noteUtils'
+import { ENGLISH_NOTES, OCTAVES } from '../../shared/constants/notes'
 
 interface FlashcardsProps {
   onBack: () => void
@@ -8,88 +11,39 @@ interface FlashcardsProps {
 
 type FlashcardMode = 'noteNames' | 'notesOnScore'
 
-const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
-const octaves = [4, 5, 6]
-
 const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<FlashcardMode>('noteNames')
   const [currentNote, setCurrentNote] = useState<string>('')
-  const [currentOctave, setCurrentOctave] = useState<number>(4)
   const [showAnswer, setShowAnswer] = useState(false)
-  const notationRef = useRef<HTMLDivElement>(null)
-  const synthRef = useRef<Tone.Synth | null>(null)
+  const { playNote } = useAudioSynth()
+  const notationRef = useNotation({ note: currentNote })
 
   useEffect(() => {
-    synthRef.current = new Tone.Synth().toDestination()
     generateNewNote()
-    return () => {
-      synthRef.current?.dispose()
-    }
   }, [])
 
-  useEffect(() => {
-    if (mode === 'notesOnScore' && notationRef.current) {
-      renderNotation()
-    }
-  }, [currentNote, currentOctave, mode, showAnswer])
-
   const generateNewNote = () => {
-    const randomNote = notes[Math.floor(Math.random() * notes.length)]
-    const randomOctave = octaves[Math.floor(Math.random() * octaves.length)]
-    setCurrentNote(randomNote)
-    setCurrentOctave(randomOctave)
+    const randomNote = ENGLISH_NOTES[Math.floor(Math.random() * ENGLISH_NOTES.length)]
+    const randomOctave = OCTAVES[Math.floor(Math.random() * OCTAVES.length)]
+    setCurrentNote(`${randomNote}${randomOctave}`)
     setShowAnswer(false)
   }
 
-  const playNote = async () => {
-    if (synthRef.current) {
-      await Tone.start()
-      synthRef.current.triggerAttackRelease(`${currentNote}${currentOctave}`, '8n')
-    }
-  }
-
-  const renderNotation = () => {
-    if (!notationRef.current) return
-
-    // Clear previous notation safely
-    while (notationRef.current.firstChild) {
-      notationRef.current.removeChild(notationRef.current.firstChild)
-    }
-
-    const width = 400
-    const height = 200
-
-    const renderer = new Renderer(notationRef.current, Renderer.Backends.SVG)
-    renderer.resize(width, height)
-    const context = renderer.getContext()
-
-    const stave = new Stave(10, 40, width - 20)
-    stave.addClef('treble').setContext(context).draw()
-
-    // Convert note to VexFlow format
-    const vexNote = `${currentNote}/${currentOctave}`
-    const staveNote = new StaveNote({
-      keys: [vexNote],
-      duration: 'w',
-    })
-
-    const voice = new Voice({ numBeats: 4, beatValue: 4 })
-    voice.addTickable(staveNote)
-
-    new Formatter().joinVoices([voice]).format([voice], width - 60)
-    voice.draw(context, stave)
+  const handlePlayNote = async () => {
+    await playNote(currentNote)
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <button className="btn btn-ghost" onClick={onBack}>
-          ← Back
+          ← {t('common.back')}
         </button>
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">Flashcards</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">{t('flashcards.title')}</h1>
 
         {/* Mode Selection */}
         <div className="flex justify-center gap-4 mb-8">
@@ -97,13 +51,13 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
             className={`btn ${mode === 'noteNames' ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => setMode('noteNames')}
           >
-            Note Names
+            {t('flashcards.noteNames')}
           </button>
           <button
             className={`btn ${mode === 'notesOnScore' ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => setMode('notesOnScore')}
           >
-            Notes on Score
+            {t('flashcards.notesOnScore')}
           </button>
         </div>
 
@@ -113,9 +67,9 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
             {mode === 'noteNames' ? (
               <>
                 <h2 className="text-6xl font-bold mb-4">
-                  {currentNote}{currentOctave}
+                  {getDisplayNoteName(currentNote)}
                 </h2>
-                <button className="btn btn-circle btn-primary" onClick={playNote}>
+                <button className="btn btn-circle btn-primary" onClick={handlePlayNote}>
                   🔊
                 </button>
               </>
@@ -126,13 +80,13 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
                   className="mb-4 flex justify-center"
                   style={{ minHeight: '200px', width: '100%' }}
                 />
-                <button className="btn btn-circle btn-primary" onClick={playNote}>
+                <button className="btn btn-circle btn-primary" onClick={handlePlayNote}>
                   🔊
                 </button>
                 {showAnswer && (
                   <div className="mt-4">
                     <div className="text-4xl font-bold text-success">
-                      {currentNote}{currentOctave}
+                      {getDisplayNoteName(currentNote)}
                     </div>
                   </div>
                 )}
@@ -147,13 +101,13 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
             className="btn btn-secondary"
             onClick={() => setShowAnswer(!showAnswer)}
           >
-            {showAnswer ? 'Hide Answer' : 'Show Answer'}
+            {showAnswer ? t('flashcards.hideAnswer') : t('flashcards.showAnswer')}
           </button>
           <button 
             className="btn btn-primary"
             onClick={generateNewNote}
           >
-            Next Note
+            {t('flashcards.nextNote')}
           </button>
         </div>
       </div>

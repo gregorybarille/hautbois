@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import Home from './components/Home'
-import Flashcards from './components/Flashcards'
-import NoteHelper from './components/NoteHelper'
+import Home from './features/home'
+import Flashcards from './features/flashcards'
+import NoteHelper from './features/note-helper'
 
 type View = 'home' | 'flashcards' | 'noteHelper'
 

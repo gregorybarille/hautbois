@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "i18next": "^25.7.4",
     "pitchy": "^4.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-i18next": "^16.5.1",
     "tone": "^15.1.22",
     "vexflow": "^5.0.0"
   },
