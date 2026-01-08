@@ -1,0 +1,28 @@
+{
+  "app": {
+    "title": "Assistant Hautbois",
+    "description": "Améliorez votre pratique du hautbois"
+  },
+  "menu": {
+    "title": "Menu Principal",
+    "scoreFlashcards": {
+      "title": "Cartes - Partition",
+      "description": "Pratiquez la lecture de notes sur une partition"
+    },
+    "nameFlashcards": {
+      "title": "Cartes - Nom de Notes",
+      "description": "Apprenez à identifier les noms des notes"
+    },
+    "fingeringHelper": {
+      "title": "Guide des Doigtés",
+      "description": "Découvrez comment jouer chaque note sur le hautbois"
+    }
+  },
+  "common": {
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "start": "Commencer",
+    "finish": "Terminer"
+  }
+}
