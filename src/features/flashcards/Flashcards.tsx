@@ -96,7 +96,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({ onBack }) => {
                     </svg>
                   </button>
                   {showAnswer && (
-                    <div className="mt-6 animate-fade-in">
+                    <div className="mt-6">
                       <div className="badge badge-success badge-lg py-6 px-8 text-3xl font-bold">
                         {getDisplayNoteName(currentNote)}
                       </div>
