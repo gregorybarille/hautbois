@@ -33,11 +33,11 @@ export const NameFlashcards = ({ onBack }: NameFlashcardsProps) => {
     if (noteStr.includes("Grave")) {
       const noteName = noteStr.replace(" Grave", "");
       return (
-        <div className="flex items-center gap-2">
+        <div className="relative inline-flex items-center">
           <span>{noteName}</span>
           <ArrowDownRight
-            className="w-24 h-24 text-secondary mt-4"
-            strokeWidth={3}
+            className="absolute left-full ml-2 w-24 h-24 text-red-500"
+            strokeWidth={2}
           />
         </div>
       );
@@ -45,11 +45,11 @@ export const NameFlashcards = ({ onBack }: NameFlashcardsProps) => {
     if (noteStr.includes("Aigu")) {
       const noteName = noteStr.replace(" Aigu", "");
       return (
-        <div className="flex items-center gap-2">
+        <div className="relative inline-flex items-center">
           <span>{noteName}</span>
           <ArrowUpRight
-            className="w-24 h-24 text-secondary mb-4"
-            strokeWidth={3}
+            className="absolute left-full ml-2 w-24 h-24 text-blue-500"
+            strokeWidth={2}
           />
         </div>
       );
