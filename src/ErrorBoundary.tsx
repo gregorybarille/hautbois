@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { Button, Card } from "./shared/components";
 
 interface Props {
   children?: ReactNode;
@@ -35,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
 const ErrorBoundaryFallback = ({ error }: { error?: Error }) => {
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="card bg-base-100 shadow-xl max-w-lg w-full">
+      <Card className="max-w-lg w-full" noBody>
         <div className="card-body items-center text-center">
           <AlertTriangle className="w-16 h-16 text-error mb-4" />
           <h2 className="card-title text-2xl mb-2">Something went wrong</h2>
@@ -52,16 +53,13 @@ const ErrorBoundaryFallback = ({ error }: { error?: Error }) => {
           )}
 
           <div className="card-actions">
-            <button
-              className="btn btn-primary"
-              onClick={() => window.location.reload()}
-            >
+            <Button variant="primary" onClick={() => window.location.reload()}>
               <RefreshCcw className="w-4 h-4 mr-2" />
               Reload Page
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
