@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
+import { Box, Container, Title, Text, Alert } from "@mantine/core";
 import { Button, Card } from "../../shared/components";
 
 interface ScoreFlashcardsProps {
@@ -10,24 +11,34 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-base-200 p-8">
-      <div className="max-w-4xl mx-auto">
-        <Button onClick={onBack} variant="ghost" className="mb-6">
-          <ArrowLeft className="w-5 h-5 mr-2" />
+    <Box
+      style={{
+        minHeight: "100vh",
+        background: "#f5f5f5",
+        padding: "2rem",
+      }}
+    >
+      <Container size="md">
+        <Button
+          onClick={onBack}
+          variant="subtle"
+          leftSection={<ArrowLeft size={20} />}
+          mb="xl"
+        >
           {t("common.back")}
         </Button>
         <Card>
-          <h2 className="card-title text-3xl mb-4">
+          <Title order={2} size="2rem" mb="md">
             {t("menu.scoreFlashcards.title")}
-          </h2>
-          <p className="text-lg mb-6">
+          </Title>
+          <Text size="lg" mb="xl">
             {t("menu.scoreFlashcards.description")}
-          </p>
-          <div className="alert alert-info">
-            <span>Fonctionnalité en cours de développement</span>
-          </div>
+          </Text>
+          <Alert color="blue" title="Information">
+            Fonctionnalité en cours de développement
+          </Alert>
         </Card>
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };

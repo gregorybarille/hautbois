@@ -1,54 +1,41 @@
-import { HTMLAttributes, ReactNode } from 'react';
+import { Paper, PaperProps } from "@mantine/core";
+import { ReactNode } from "react";
 
-export type CardVariant = 'normal' | 'compact' | 'side';
-export type CardBg = 'base-100' | 'base-200' | 'base-300' | 'neutral' | 'primary';
-
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+interface CardProps extends Omit<PaperProps, "shadow"> {
   children: ReactNode;
-  variant?: CardVariant;
-  bg?: CardBg;
-  bordered?: boolean;
-  imageFull?: boolean;
-  glass?: boolean;
-  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  hover?: boolean; // Adds hover effect/scale
+  shadow?: "xs" | "sm" | "md" | "lg" | "xl";
+  hover?: boolean;
   fullWidth?: boolean;
-  noBody?: boolean; // If true, the caller is responsible for adding <div className="card-body">
+  noPadding?: boolean;
+  onClick?: () => void;
 }
 
 export const Card = ({
   children,
-  variant,
-  bg = 'base-100',
-  bordered,
-  imageFull,
-  glass,
-  shadow = 'xl',
-  hover,
-  fullWidth,
-  noBody = false,
-  className = '',
+  shadow = "md",
+  hover = false,
+  fullWidth = false,
+  noPadding = false,
+  className = "",
+  style,
+  onClick,
   ...props
 }: CardProps) => {
-  const classes = [
-    'card',
-    bg ? `bg-${bg}` : '',
-    variant === 'compact' ? 'card-compact' : '',
-    variant === 'side' ? 'card-side' : '',
-    bordered ? 'card-bordered' : '',
-    imageFull ? 'image-full' : '',
-    glass ? 'glass' : '',
-    shadow && shadow !== 'none' ? `shadow-${shadow}` : '',
-    hover ? 'hover:shadow-2xl transition-all duration-300 hover:scale-105' : '',
-    fullWidth ? 'w-full' : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div className={classes} {...props}>
-      {noBody ? children : <div className="card-body">{children}</div>}
-    </div>
+    <Paper
+      shadow={shadow}
+      p={noPadding ? 0 : "xl"}
+      radius="md"
+      withBorder
+      onClick={onClick}
+      className={`${hover ? "hover:shadow-xl transition-shadow duration-200" : ""} ${fullWidth ? "w-full" : ""} ${className}`}
+      style={{
+        ...style,
+        ...(hover ? { cursor: "pointer" } : {}),
+      }}
+      {...props}
+    >
+      {children}
+    </Paper>
   );
 };

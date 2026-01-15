@@ -1,69 +1,48 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react';
+import {
+  Button as MantineButton,
+  ButtonProps as MantineButtonProps,
+} from "@mantine/core";
+import { ReactNode } from "react";
 
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'ghost'
-  | 'link'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'neutral';
+  | "filled"
+  | "light"
+  | "outline"
+  | "subtle"
+  | "transparent"
+  | "white"
+  | "default";
 
-export type ButtonSize = 'lg' | 'md' | 'sm' | 'xs';
+export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<MantineButtonProps, "variant" | "size"> {
   children: ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  outline?: boolean;
-  wide?: boolean;
-  block?: boolean;
-  circle?: boolean;
-  square?: boolean;
+  fullWidth?: boolean;
   loading?: boolean;
-  glass?: boolean;
-  active?: boolean;
+  onClick?: () => void;
 }
 
 export const Button = ({
   children,
-  variant,
-  size,
-  outline,
-  wide,
-  block,
-  circle,
-  square,
-  loading,
-  glass,
-  active,
-  className = '',
-  disabled,
+  variant = "filled",
+  size = "md",
+  fullWidth = false,
+  loading = false,
+  onClick,
   ...props
 }: ButtonProps) => {
-  const classes = [
-    'btn',
-    variant ? `btn-${variant}` : '',
-    size ? `btn-${size}` : '',
-    outline ? 'btn-outline' : '',
-    wide ? 'btn-wide' : '',
-    block ? 'btn-block' : '',
-    circle ? 'btn-circle' : '',
-    square ? 'btn-square' : '',
-    glass ? 'glass' : '',
-    active ? 'btn-active' : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <button className={classes} disabled={disabled || loading} {...props}>
-      {loading && <span className="loading loading-spinner"></span>}
+    <MantineButton
+      variant={variant}
+      size={size}
+      fullWidth={fullWidth}
+      loading={loading}
+      onClick={onClick}
+      {...props}
+    >
       {children}
-    </button>
+    </MantineButton>
   );
 };

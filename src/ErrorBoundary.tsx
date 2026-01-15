@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { Box, Title, Text, Code } from "@mantine/core";
 import { Button, Card } from "./shared/components";
 
 interface Props {
@@ -35,32 +36,76 @@ class ErrorBoundary extends Component<Props, State> {
 
 const ErrorBoundaryFallback = ({ error }: { error?: Error }) => {
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <Card className="max-w-lg w-full" noBody>
-        <div className="card-body items-center text-center">
-          <AlertTriangle className="w-16 h-16 text-error mb-4" />
-          <h2 className="card-title text-2xl mb-2">Something went wrong</h2>
-          <p className="text-base-content/70 mb-6">
+    <Box
+      style={{
+        minHeight: "100vh",
+        background: "#f5f5f5",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+      }}
+    >
+      <Card noPadding style={{ maxWidth: 512, width: "100%" }}>
+        <Box
+          p="xl"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <AlertTriangle
+            style={{
+              width: 64,
+              height: 64,
+              color: "var(--mantine-color-red-6)",
+              marginBottom: "1rem",
+            }}
+          />
+          <Title order={2} size="1.5rem" mb="sm">
+            Something went wrong
+          </Title>
+          <Text c="dimmed" mb="xl">
             An unexpected error occurred. Please try reloading the page.
-          </p>
+          </Text>
 
           {error && (
-            <div className="w-full text-left bg-base-300 p-4 rounded-lg mb-6 overflow-auto max-h-48">
-              <code className="text-xs font-mono whitespace-pre-wrap text-error">
+            <Box
+              style={{
+                width: "100%",
+                textAlign: "left",
+                background: "var(--mantine-color-gray-1)",
+                padding: "1rem",
+                borderRadius: 8,
+                marginBottom: "1.5rem",
+                overflow: "auto",
+                maxHeight: 192,
+              }}
+            >
+              <Code
+                style={{
+                  fontSize: "0.75rem",
+                  whiteSpace: "pre-wrap",
+                  color: "var(--mantine-color-red-6)",
+                }}
+              >
                 {error.toString()}
-              </code>
-            </div>
+              </Code>
+            </Box>
           )}
 
-          <div className="card-actions">
-            <Button variant="primary" onClick={() => window.location.reload()}>
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Reload Page
-            </Button>
-          </div>
-        </div>
+          <Button
+            variant="filled"
+            onClick={() => window.location.reload()}
+            leftSection={<RefreshCcw size={16} />}
+          >
+            Reload Page
+          </Button>
+        </Box>
       </Card>
-    </div>
+    </Box>
   );
 };
 
