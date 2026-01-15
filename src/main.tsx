@@ -1,11 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import './i18n/config'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { MantineProvider } from "@mantine/core";
+import App from "./App.tsx";
+import ErrorBoundary from "./ErrorBoundary.tsx";
+import "./index.css";
+import "./shared/i18n/config";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <MantineProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </MantineProvider>
   </StrictMode>,
-)
+);

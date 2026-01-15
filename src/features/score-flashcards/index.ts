@@ -1,0 +1,1 @@
+export { ScoreFlashcards } from './ScoreFlashcards';
