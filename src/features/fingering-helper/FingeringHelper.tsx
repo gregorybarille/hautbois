@@ -1,7 +1,16 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
-import { Box, Container, Title, Text, Group, ActionIcon } from "@mantine/core";
+import {
+  Box,
+  Container,
+  Title,
+  Text,
+  Group,
+  ActionIcon,
+  Stack,
+  Flex,
+} from "@mantine/core";
 import { Button, Card } from "../../shared/components";
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { OboeFingeringChart } from "../../shared/components/oboe/OboeFingeringChart";
@@ -65,99 +74,105 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
           {t("common.back")}
         </Button>
 
-        <Box style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          <Card noPadding style={{ background: "white" }}>
-            <Box p="xl">
-              <Title order={2} size="1.5rem" mb="xl">
-                {t("menu.fingeringHelper.title")}
-              </Title>
-              <MusicScore
-                notes={naturalNotes}
-                activeNote={currentBaseNote}
-                onNoteClick={handleScoreClick}
-              />
+        <Card noPadding style={{ background: "white" }}>
+          <Box p="xl">
+            <Title order={2} size="1.5rem" mb="xl">
+              {t("menu.fingeringHelper.title")}
+            </Title>
 
-              <Box
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  marginTop: "1.5rem",
-                }}
-              >
-                <Text
-                  size="sm"
-                  fw={600}
-                  tt="uppercase"
-                  c="dimmed"
-                  mb="sm"
-                  style={{ letterSpacing: "0.05em" }}
-                >
-                  Variations
-                </Text>
-                <Group gap="md">
-                  <ActionIcon
-                    variant={selectedNote.includes("♭") ? "filled" : "default"}
-                    color={selectedNote.includes("♭") ? "blue" : "gray"}
-                    disabled={!variations.flat}
-                    size={64}
-                    radius="xl"
-                    onClick={() => {
-                      if (selectedNote.includes("♭") && variations.natural) {
-                        setSelectedNote(variations.natural);
-                      } else if (variations.flat) {
-                        setSelectedNote(variations.flat);
-                      }
-                    }}
-                    style={{
-                      fontSize: "2rem",
-                      fontFamily: "serif",
-                      border: !selectedNote.includes("♭")
-                        ? "2px solid var(--mantine-color-gray-3)"
-                        : "none",
-                    }}
-                  >
-                    ♭
-                  </ActionIcon>
-                  <ActionIcon
-                    variant={selectedNote.includes("#") ? "filled" : "default"}
-                    color={selectedNote.includes("#") ? "blue" : "gray"}
-                    disabled={!variations.sharp}
-                    size={64}
-                    radius="xl"
-                    onClick={() => {
-                      if (selectedNote.includes("#") && variations.natural) {
-                        setSelectedNote(variations.natural);
-                      } else if (variations.sharp) {
-                        setSelectedNote(variations.sharp);
-                      }
-                    }}
-                    style={{
-                      fontSize: "2rem",
-                      fontFamily: "serif",
-                      border: !selectedNote.includes("#")
-                        ? "2px solid var(--mantine-color-gray-3)"
-                        : "none",
-                    }}
-                  >
-                    ♯
-                  </ActionIcon>
-                </Group>
-              </Box>
-            </Box>
-          </Card>
-
-          <Box style={{ display: "flex", justifyContent: "center" }}>
-            <Card
-              noPadding
-              style={{ width: "100%", maxWidth: 448, background: "white" }}
+            <Flex
+              gap="xl"
+              direction={{ base: "column", md: "row" }}
+              align={{ base: "center", md: "flex-start" }}
             >
+              {/* Left side: Music score and variations */}
+              <Box style={{ flex: 1 }}>
+                <MusicScore
+                  notes={naturalNotes}
+                  activeNote={currentBaseNote}
+                  onNoteClick={handleScoreClick}
+                />
+
+                <Box
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginTop: "1.5rem",
+                  }}
+                >
+                  <Text
+                    size="sm"
+                    fw={600}
+                    tt="uppercase"
+                    c="dimmed"
+                    mb="sm"
+                    style={{ letterSpacing: "0.05em" }}
+                  >
+                    Variations
+                  </Text>
+                  <Group gap="md">
+                    <ActionIcon
+                      variant={
+                        selectedNote.includes("♭") ? "filled" : "default"
+                      }
+                      color={selectedNote.includes("♭") ? "blue" : "gray"}
+                      disabled={!variations.flat}
+                      size={64}
+                      radius="xl"
+                      onClick={() => {
+                        if (selectedNote.includes("♭") && variations.natural) {
+                          setSelectedNote(variations.natural);
+                        } else if (variations.flat) {
+                          setSelectedNote(variations.flat);
+                        }
+                      }}
+                      style={{
+                        fontSize: "2rem",
+                        fontFamily: "serif",
+                        border: !selectedNote.includes("♭")
+                          ? "2px solid var(--mantine-color-gray-3)"
+                          : "none",
+                      }}
+                    >
+                      ♭
+                    </ActionIcon>
+                    <ActionIcon
+                      variant={
+                        selectedNote.includes("#") ? "filled" : "default"
+                      }
+                      color={selectedNote.includes("#") ? "blue" : "gray"}
+                      disabled={!variations.sharp}
+                      size={64}
+                      radius="xl"
+                      onClick={() => {
+                        if (selectedNote.includes("#") && variations.natural) {
+                          setSelectedNote(variations.natural);
+                        } else if (variations.sharp) {
+                          setSelectedNote(variations.sharp);
+                        }
+                      }}
+                      style={{
+                        fontSize: "2rem",
+                        fontFamily: "serif",
+                        border: !selectedNote.includes("#")
+                          ? "2px solid var(--mantine-color-gray-3)"
+                          : "none",
+                      }}
+                    >
+                      ♯
+                    </ActionIcon>
+                  </Group>
+                </Box>
+              </Box>
+
+              {/* Right side: Oboe fingering chart */}
               <Box
-                p="xl"
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
+                  minWidth: 300,
                 }}
               >
                 <Title order={3} size="2rem" mb="md">
@@ -168,9 +183,9 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
                   height={500}
                 />
               </Box>
-            </Card>
+            </Flex>
           </Box>
-        </Box>
+        </Card>
       </Container>
     </Box>
   );
