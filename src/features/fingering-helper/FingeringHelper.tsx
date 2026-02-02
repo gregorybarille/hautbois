@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Moon, Sun } from "lucide-react";
 import {
   Box,
   Container,
@@ -8,7 +8,6 @@ import {
   Text,
   Group,
   ActionIcon,
-  Stack,
   Flex,
 } from "@mantine/core";
 import { Button, Card } from "../../shared/components";
@@ -22,6 +21,7 @@ interface FingeringHelperProps {
 
 export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
   const { t } = useTranslation();
+  const [darkMode, setDarkMode] = useState(false);
 
   // Filter for natural notes only (no sharp or flat symbols)
   const naturalNotes = useMemo(
@@ -60,37 +60,63 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
     <Box
       style={{
         minHeight: "100vh",
-        background: "#f5f5f5",
+        background: darkMode ? "#1a1a1a" : "#f5f5f5",
         padding: "2rem",
+        transition: "background 0.3s ease",
       }}
     >
       <Container size="xl">
-        <Button
-          onClick={onBack}
-          variant="subtle"
-          leftSection={<ArrowLeft size={20} />}
-          mb="xl"
-        >
-          {t("common.back")}
-        </Button>
+        <Group justify="space-between" mb="xl">
+          <Button
+            onClick={onBack}
+            variant="subtle"
+            leftSection={<ArrowLeft size={20} />}
+            style={{ color: darkMode ? "#ffffff" : undefined }}
+          >
+            {t("common.back")}
+          </Button>
 
-        <Card noPadding style={{ background: "white" }}>
+          <ActionIcon
+            onClick={() => setDarkMode(!darkMode)}
+            size="lg"
+            variant="subtle"
+            radius="xl"
+            style={{ color: darkMode ? "#ffffff" : "#000000" }}
+          >
+            {darkMode ? <Sun size={22} /> : <Moon size={22} />}
+          </ActionIcon>
+        </Group>
+
+        <Card
+          noPadding
+          style={{
+            background: darkMode ? "#2a2a2a" : "white",
+            transition: "background 0.3s ease",
+          }}
+        >
           <Box p="xl">
-            <Title order={2} size="1.5rem" mb="xl">
+            <Title
+              order={2}
+              size="1.5rem"
+              mb="xl"
+              style={{ color: darkMode ? "#ffffff" : undefined }}
+            >
               {t("menu.fingeringHelper.title")}
             </Title>
 
             <Flex
               gap="xl"
               direction={{ base: "column", md: "row" }}
-              align={{ base: "center", md: "flex-start" }}
+              align={{ base: "center", md: "center" }}
+              justify="space-between"
             >
               {/* Left side: Music score and variations */}
-              <Box style={{ flex: 1 }}>
+              <Box style={{ flex: 1, maxWidth: 600 }}>
                 <MusicScore
                   notes={naturalNotes}
                   activeNote={currentBaseNote}
                   onNoteClick={handleScoreClick}
+                  darkMode={darkMode}
                 />
 
                 <Box
@@ -107,7 +133,10 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
                     tt="uppercase"
                     c="dimmed"
                     mb="sm"
-                    style={{ letterSpacing: "0.05em" }}
+                    style={{
+                      letterSpacing: "0.05em",
+                      color: darkMode ? "#9ca3af" : undefined,
+                    }}
                   >
                     Variations
                   </Text>
@@ -175,12 +204,18 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
                   minWidth: 300,
                 }}
               >
-                <Title order={3} size="2rem" mb="md">
+                <Title
+                  order={3}
+                  size="2rem"
+                  mb="md"
+                  style={{ color: darkMode ? "#ffffff" : undefined }}
+                >
                   {selectedNote}
                 </Title>
                 <OboeFingeringChart
                   keys={OBOE_FINGERINGS[selectedNote]}
-                  height={500}
+                  height={650}
+                  darkMode={darkMode}
                 />
               </Box>
             </Flex>

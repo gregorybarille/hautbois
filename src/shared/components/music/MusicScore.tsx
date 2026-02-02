@@ -34,12 +34,14 @@ interface MusicScoreProps {
   notes: string[];
   activeNote?: string;
   onNoteClick: (note: string) => void;
+  darkMode?: boolean;
 }
 
 export const MusicScore = ({
   notes,
   activeNote,
   onNoteClick,
+  darkMode = false,
 }: MusicScoreProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,13 @@ export const MusicScore = ({
   const width = START_OFFSET + notes.length * NOTE_SPACING + 40;
   const height = 160;
 
+  // Colors based on mode
+  const staffColor = darkMode ? "#6b7280" : "#374151";
+  const noteColor = darkMode ? "#e5e5e5" : "#1f2937";
+  const activeColor = "#8B5CF6"; // violet
+  const bgColor = darkMode ? "#1a1a1a" : "#f9fafb";
+  const borderColor = darkMode ? "#374151" : "#e5e7eb";
+
   // Helper to draw staff lines
   const renderStaffLines = () => {
     const lines = [];
@@ -82,7 +91,7 @@ export const MusicScore = ({
           y1={y}
           x2={width}
           y2={y}
-          stroke="#374151" // gray-700
+          stroke={staffColor}
           strokeWidth="1"
         />,
       );
@@ -93,8 +102,13 @@ export const MusicScore = ({
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-x-auto bg-base-100 rounded-xl shadow-inner border border-base-300 p-4"
-      style={{ scrollBehavior: "smooth" }}
+      className="w-full overflow-x-auto rounded-xl shadow-inner border p-4"
+      style={{
+        scrollBehavior: "smooth",
+        backgroundColor: bgColor,
+        borderColor: borderColor,
+        transition: "all 0.3s ease",
+      }}
     >
       <svg width={width} height={height} className="mx-auto block">
         {renderStaffLines()}
@@ -105,7 +119,7 @@ export const MusicScore = ({
           y={STAFF_Y_START + 4 * LINE_SPACING - 5}
           fontFamily="serif"
           fontSize="65"
-          fill="#1f2937" // gray-800
+          fill={noteColor}
         >
           𝄞
         </text>
@@ -119,7 +133,7 @@ export const MusicScore = ({
           const cy = STAFF_Y_START + pos.step * STEP_HEIGHT;
 
           const isActive = noteName === activeNote;
-          const noteColor = isActive ? "#2563EB" : "#1f2937"; // blue-600 vs gray-800
+          const currentNoteColor = isActive ? activeColor : noteColor;
 
           // Ledger lines
           const renderLedgerLines = () => {
@@ -134,7 +148,7 @@ export const MusicScore = ({
                   y1={ly}
                   x2={x + 14}
                   y2={ly}
-                  stroke="#374151"
+                  stroke={staffColor}
                   strokeWidth="1"
                 />,
               );
@@ -150,7 +164,7 @@ export const MusicScore = ({
                   y1={ly}
                   x2={x + 14}
                   y2={ly}
-                  stroke="#374151"
+                  stroke={staffColor}
                   strokeWidth="1"
                 />,
               );
@@ -182,7 +196,7 @@ export const MusicScore = ({
                 cy={cy}
                 rx={7}
                 ry={5}
-                fill={noteColor}
+                fill={currentNoteColor}
                 transform={`rotate(-20 ${x} ${cy})`}
               />
 
@@ -195,7 +209,7 @@ export const MusicScore = ({
                   y1={cy}
                   x2={x - 6}
                   y2={cy + 35}
-                  stroke={noteColor}
+                  stroke={currentNoteColor}
                   strokeWidth="1.5"
                 />
               ) : (
@@ -205,7 +219,7 @@ export const MusicScore = ({
                   y1={cy}
                   x2={x + 6}
                   y2={cy - 35}
-                  stroke={noteColor}
+                  stroke={currentNoteColor}
                   strokeWidth="1.5"
                 />
               )}

@@ -26,7 +26,7 @@ function App() {
           <Box
             style={{
               minHeight: "100vh",
-              background: "linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)",
+              background: "#f5f5f5",
               padding: "2rem",
             }}
           >

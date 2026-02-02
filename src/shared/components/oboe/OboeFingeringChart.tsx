@@ -4,6 +4,7 @@ interface OboeFingeringChartProps {
   keys?: Partial<OboeKeys>;
   className?: string;
   height?: number;
+  darkMode?: boolean;
 }
 
 type KeyStatus = boolean | "open" | "closed" | "half";
@@ -12,25 +13,27 @@ export const OboeFingeringChart = ({
   keys = {},
   className = "",
   height = 600,
+  darkMode = false,
 }: OboeFingeringChartProps) => {
   const isPressed = (status: KeyStatus) =>
     status === true || status === "closed";
   const isHalf = (status: KeyStatus) => status === "half";
 
   // Colors - African blackwood oboe with warm tones
-  const woodDarkest = "#0D0806";
-  const woodDark = "#1A1210";
-  const woodMid = "#2A1F1A";
-  const woodLight = "#3D2E25";
-  const woodHighlight = "#5A4035";
-  
+  const woodDarkest = darkMode ? "#0a0a0a" : "#0D0806";
+  const woodDark = darkMode ? "#1a1210" : "#1A1210";
+  const woodMid = darkMode ? "#2a1f1a" : "#2A1F1A";
+  const woodLight = darkMode ? "#3d2e25" : "#3D2E25";
+  const woodHighlight = darkMode ? "#5a4035" : "#5A4035";
+
   // Nickel silver keys - simple white
-  const keyWhite = "#FFFFFF";
-  const keyBorder = "#888888";
-  
-  // State colors - pastel violet when pressed
-  const pressedColor = "#C4B5FD"; // violet pastel
-  const holeBlack = "#050302";
+  const keyWhite = darkMode ? "#e5e5e5" : "#FFFFFF";
+  const keyBorder = darkMode ? "#666666" : "#888888";
+
+  // State colors - darker violet when pressed
+  const pressedColor = "#8B5CF6"; // violet plus foncé
+  const holeBlack = darkMode ? "#000000" : "#050302";
+  const textColor = darkMode ? "#e5e5e5" : "#4B5563";
 
   return (
     <svg
@@ -51,7 +54,13 @@ export const OboeFingeringChart = ({
         </linearGradient>
 
         {/* Vertical wood grain texture */}
-        <linearGradient id="woodGrainVertical" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient
+          id="woodGrainVertical"
+          x1="0%"
+          y1="0%"
+          x2="0%"
+          y2="100%"
+        >
           <stop offset="0%" stopColor={woodMid} stopOpacity="0.1" />
           <stop offset="25%" stopColor={woodDark} stopOpacity="0.05" />
           <stop offset="50%" stopColor={woodMid} stopOpacity="0.1" />
@@ -110,7 +119,7 @@ export const OboeFingeringChart = ({
         stroke={woodDarkest}
         strokeWidth="0.5"
       />
-      
+
       {/* Upper joint - main body with realistic taper */}
       <path
         d="M 90 28 L 85 265 L 115 265 L 110 28 Z"
@@ -124,18 +133,15 @@ export const OboeFingeringChart = ({
         fill="url(#woodGrainVertical)"
       />
       {/* Cylindrical shine */}
-      <path
-        d="M 90 28 L 85 265 L 115 265 L 110 28 Z"
-        fill="url(#bodyShine)"
-      />
+      <path d="M 90 28 L 85 265 L 115 265 L 110 28 Z" fill="url(#bodyShine)" />
 
       {/* Top ring - ivory/bone decorative ring */}
       <ellipse cx="100" cy="28" rx="11" ry="3" fill={woodDarkest} />
       <ellipse cx="100" cy="27" rx="10" ry="2.5" fill="url(#ivoryGrad)" />
-      
+
       {/* Cork tenon ring at joint */}
       <rect x="84" y="258" width="32" height="8" rx="1" fill="url(#corkGrad)" />
-      
+
       {/* Upper tenon ring */}
       <ellipse cx="100" cy="265" rx="16" ry="4" fill={woodDarkest} />
       <ellipse cx="100" cy="264" rx="15" ry="3" fill={woodMid} />
@@ -185,18 +191,25 @@ export const OboeFingeringChart = ({
         d="M 78 555 Q 72 580 65 605 Q 100 615 135 605 Q 128 580 122 555 Z"
         fill="url(#bodyShine)"
       />
-      
+
       {/* Bell rim - ivory ring */}
       <ellipse cx="100" cy="605" rx="35" ry="8" fill={woodDarkest} />
       <ellipse cx="100" cy="604" rx="34" ry="7" fill="url(#ivoryGrad)" />
-      
+
       {/* Bell opening */}
       <ellipse cx="100" cy="605" rx="28" ry="5" fill={holeBlack} />
 
       {/* ========== OCTAVE KEYS (Back/Thumb Left) ========== */}
 
       {/* Label */}
-      <text x="20" y="50" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+      <text
+        x="20"
+        y="50"
+        fontSize="9"
+        fontWeight="600"
+        fill={textColor}
+        fontFamily="system-ui"
+      >
         Octaves
       </text>
 
@@ -226,7 +239,7 @@ export const OboeFingeringChart = ({
         fill="none"
         strokeLinecap="round"
       />
-      <text x="18" y="71" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+      <text x="18" y="71" fontSize="8" fill={textColor} fontFamily="system-ui">
         1
       </text>
 
@@ -240,7 +253,7 @@ export const OboeFingeringChart = ({
         stroke={keyBorder}
         strokeWidth="1"
       />
-      <text x="52" y="91" fontSize="7" fill="#6B7280" fontFamily="system-ui">
+      <text x="52" y="91" fontSize="7" fill={textColor} fontFamily="system-ui">
         2
       </text>
 
@@ -254,7 +267,7 @@ export const OboeFingeringChart = ({
         stroke={keyBorder}
         strokeWidth="1"
       />
-      <text x="12" y="91" fontSize="7" fill="#6B7280" fontFamily="system-ui">
+      <text x="12" y="91" fontSize="7" fill={textColor} fontFamily="system-ui">
         3
       </text>
 
@@ -276,7 +289,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="62" y="113" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="62"
+          y="113"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           L1
         </text>
       </g>
@@ -301,7 +321,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="142" y="128" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="142"
+          y="128"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Mib
         </text>
       </g>
@@ -316,7 +342,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="62" y="168" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="62"
+          y="168"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           L2
         </text>
       </g>
@@ -340,7 +373,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="40" y="198" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="40"
+          y="198"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Fa
         </text>
       </g>
@@ -355,7 +394,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="62" y="223" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="62"
+          y="223"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           L3
         </text>
       </g>
@@ -378,7 +424,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="142" y="251" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="142"
+          y="251"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Sol#
         </text>
       </g>
@@ -395,7 +447,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="120" y="323" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="120"
+          y="323"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           R1
         </text>
       </g>
@@ -410,7 +469,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="120" y="383" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="120"
+          y="383"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           R2
         </text>
       </g>
@@ -425,7 +491,14 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="120" y="443" fontSize="9" fontWeight="600" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="120"
+          y="443"
+          fontSize="9"
+          fontWeight="600"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           R3
         </text>
       </g>
@@ -453,7 +526,13 @@ export const OboeFingeringChart = ({
           strokeWidth="1"
           strokeLinecap="round"
         />
-        <text x="35" y="468" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="35"
+          y="468"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Ban
         </text>
       </g>
@@ -478,7 +557,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="148" y="478" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="148"
+          y="478"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Do
         </text>
       </g>
@@ -502,7 +587,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="156" y="505" fontSize="7" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="156"
+          y="505"
+          fontSize="7"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Do#
         </text>
       </g>
@@ -526,7 +617,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="142" y="525" fontSize="7" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="142"
+          y="525"
+          fontSize="7"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Mib
         </text>
       </g>
@@ -551,14 +648,27 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="38" y="513" fontSize="8" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="38"
+          y="513"
+          fontSize="8"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Si
         </text>
       </g>
 
       {/* Low Bb - lower bell key */}
       <g>
-        <line x1="58" y1="519" x2="52" y2="530" stroke={keyBorder} strokeWidth="1.5" />
+        <line
+          x1="58"
+          y1="519"
+          x2="52"
+          y2="530"
+          stroke={keyBorder}
+          strokeWidth="1.5"
+        />
         <ellipse
           cx="48"
           cy="538"
@@ -568,7 +678,13 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="28" y="541" fontSize="7" fill="#6B7280" fontFamily="system-ui">
+        <text
+          x="28"
+          y="541"
+          fontSize="7"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           Sib
         </text>
       </g>
@@ -582,11 +698,11 @@ export const OboeFingeringChart = ({
           width="160"
           height="35"
           rx="8"
-          fill="#F9FAFB"
-          stroke="#E5E7EB"
+          fill={darkMode ? "#1a1a1a" : "#F9FAFB"}
+          stroke={darkMode ? "#374151" : "#E5E7EB"}
           strokeWidth="1"
         />
-        
+
         {/* Open */}
         <circle
           cx="8"
@@ -596,7 +712,7 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="20" y="4" fontSize="9" fill="#4B5563" fontFamily="system-ui">
+        <text x="20" y="4" fontSize="9" fill={textColor} fontFamily="system-ui">
           Ouvert
         </text>
 
@@ -609,7 +725,7 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="82" y="4" fontSize="9" fill="#4B5563" fontFamily="system-ui">
+        <text x="82" y="4" fontSize="9" fill={textColor} fontFamily="system-ui">
           Fermé
         </text>
 
@@ -622,33 +738,16 @@ export const OboeFingeringChart = ({
           stroke={keyBorder}
           strokeWidth="1"
         />
-        <text x="142" y="4" fontSize="9" fill="#4B5563" fontFamily="system-ui">
+        <text
+          x="142"
+          y="4"
+          fontSize="9"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
           ½
         </text>
       </g>
-
-      {/* Title badge at top */}
-      <rect
-        x="60"
-        y="2"
-        width="80"
-        height="20"
-        rx="10"
-        fill="url(#ivoryGrad)"
-        stroke={woodDark}
-        strokeWidth="1"
-      />
-      <text
-        x="100"
-        y="16"
-        fontSize="12"
-        fontWeight="600"
-        textAnchor="middle"
-        fill={woodDarkest}
-        fontFamily="system-ui"
-      >
-        Hautbois
-      </text>
     </svg>
   );
 };
