@@ -93,7 +93,7 @@ export const useNoteSpeechRecognition = (
 
   useEffect(() => {
     onNoteRef.current = onNote;
-  });
+  }, [onNote]);
 
   useEffect(() => {
     const SpeechRecognitionAPI = getSpeechRecognitionAPI();
