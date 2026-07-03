@@ -35,6 +35,23 @@ const BASE_SEMITONES: Record<NoteBase, number> = {
 
 export const NOTE_BASES = Object.keys(BASE_STEPS) as NoteBase[];
 
+// The 12 pitch classes in ascending order, using the app's spelling
+// convention (sharps for Do/Fa/Sol, flats for Mi/Si).
+export const CHROMATIC_NOTES = [
+  "Do",
+  "Do#",
+  "Ré",
+  "Mi♭",
+  "Mi",
+  "Fa",
+  "Fa#",
+  "Sol",
+  "Sol#",
+  "La",
+  "Si♭",
+  "Si",
+];
+
 export function parseNote(name: string): ParsedNote | null {
   let rest = name;
   let register: Register = "middle";

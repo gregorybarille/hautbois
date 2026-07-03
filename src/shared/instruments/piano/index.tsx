@@ -1,27 +1,12 @@
 import { InstrumentConfig } from "../types";
-import { noteSemitone } from "../../music/notes";
+import { CHROMATIC_NOTES, noteSemitone } from "../../music/notes";
 import { PianoKeyboard } from "./PianoKeyboard";
-
-const CHROMATIC = [
-  "Do",
-  "Do#",
-  "Ré",
-  "Mi♭",
-  "Mi",
-  "Fa",
-  "Fa#",
-  "Sol",
-  "Sol#",
-  "La",
-  "Si♭",
-  "Si",
-];
 
 // Three octaves: Grave (C3), middle (C4), Aigu (C5)
 const PIANO_NOTES = [
-  ...CHROMATIC.map((n) => `${n} Grave`),
-  ...CHROMATIC,
-  ...CHROMATIC.map((n) => `${n} Aigu`),
+  ...CHROMATIC_NOTES.map((n) => `${n} Grave`),
+  ...CHROMATIC_NOTES,
+  ...CHROMATIC_NOTES.map((n) => `${n} Aigu`),
 ];
 
 export const piano: InstrumentConfig = {
