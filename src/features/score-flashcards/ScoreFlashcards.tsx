@@ -243,7 +243,7 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
   };
 
   // Calcul de la progression
-  const progress = (currentNoteIndex / generatedNotes.length) * 100;
+  const progress = generatedNotes.length ? (currentNoteIndex / generatedNotes.length) * 100 : 0;
   const isComplete = currentNoteIndex >= generatedNotes.length;
 
   return (
