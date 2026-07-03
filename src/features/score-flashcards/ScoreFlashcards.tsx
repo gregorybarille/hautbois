@@ -148,9 +148,14 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
         };
 
         // Chercher quelle note a été dite
+        const words = normalizedTranscript.split(/[^a-z]+/).filter(Boolean);
         let foundNote: string | undefined;
         for (const [variant, note] of Object.entries(noteMapping)) {
-          if (normalizedTranscript.includes(variant)) {
+          const hasMatch =
+            variant.length === 1
+              ? words.includes(variant)
+              : normalizedTranscript.includes(variant);
+          if (hasMatch) {
             console.log(
               `✅ Match trouvé! Variante "${variant}" → Note "${note}"`,
             );
