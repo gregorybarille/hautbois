@@ -97,7 +97,9 @@ export const FLUTE_FINGERINGS: Record<string, Partial<FluteKeys>> = {
     dSharp: true,
   },
   La: { thumbB: true, l1: true, l2: true, dSharp: true },
-  "Si♭": { thumbB: true, l1: true, r1: true, dSharp: true }, // "1 et 1"
+  // Pouce Si♭ (Briccialdi), le doigté enseigné en premier en France;
+  // alternative « 1 et 1 » : thumbB + l1 + r1 + dSharp
+  "Si♭": { thumbBb: true, l1: true, dSharp: true },
   Si: { thumbB: true, l1: true, dSharp: true },
 
   // Second octave (overblown; D5/E♭5 lift L1)
@@ -155,6 +157,6 @@ export const FLUTE_FINGERINGS: Record<string, Partial<FluteKeys>> = {
     dSharp: true,
   },
   "La Aigu": { thumbB: true, l1: true, l2: true, dSharp: true },
-  "Si♭ Aigu": { thumbB: true, l1: true, r1: true, dSharp: true },
+  "Si♭ Aigu": { thumbBb: true, l1: true, dSharp: true },
   "Si Aigu": { thumbB: true, l1: true, dSharp: true },
 };
