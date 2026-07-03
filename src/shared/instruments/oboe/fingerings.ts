@@ -108,7 +108,7 @@ export const OBOE_FINGERINGS: Record<string, Partial<OboeKeys>> = {
     r3: true,
     rightEb: true,
   }, // Forked F
-  "Fa#": { l1: "closed", l2: true, l3: true, r1: true, r2: true }, // Wait, F# is usually just R2 (+ R1/L1/2/3). Correction: L1, L2, L3, R1, R2?? No. F# is L1, L2, L3, R2.
+  "Fa#": { l1: "closed", l2: true, l3: true, r2: true },
   Sol: { l1: "closed", l2: true, l3: true },
   "Sol#": { l1: "closed", l2: true, l3: true, gSharp: true },
   La: { l1: "closed", l2: true },
