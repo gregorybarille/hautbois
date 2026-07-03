@@ -102,8 +102,13 @@ export const MusicScore = ({
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-x-auto rounded-xl shadow-inner border p-4"
       style={{
+        width: "100%",
+        overflowX: "auto",
+        borderRadius: "0.75rem",
+        boxShadow: "inset 0 2px 4px 0 rgba(0,0,0,0.06)",
+        border: "1px solid",
+        padding: "1rem",
         scrollBehavior: "smooth",
         backgroundColor: bgColor,
         borderColor: borderColor,
