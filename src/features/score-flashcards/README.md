@@ -67,10 +67,7 @@ Un message d'alerte s'affiche automatiquement si le navigateur n'est pas compati
 
 ### Validation Manuelle
 
-Si la reconnaissance vocale ne fonctionne pas correctement, vous pouvez utiliser les boutons :
-- **Correct** ✓ : Marquer la note comme correcte
-- **Incorrect** ✗ : Marquer la note comme incorrecte
-
+Si la reconnaissance vocale ne fonctionne pas correctement, vous pouvez répondre en cliquant sur la note (Do, Ré, Mi, ...) dans la grille de boutons.
 ## Architecture Technique
 
 ### Composants
