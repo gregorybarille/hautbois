@@ -42,6 +42,11 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
   const [voiceSupported, setVoiceSupported] = useState(true);
   const [voiceError, setVoiceError] = useState<string>("");
   const recognitionRef = useRef<any>(null);
+  const isListeningRef = useRef(false);
+  const voiceErrorRef = useRef("");
+  const currentNoteIndexRef = useRef(0);
+  const generatedNotesRef = useRef<NoteResult[]>([]);
+  const checkAnswerRef = useRef<(note: string) => void>(() => {});
 
   // Générer 10 notes aléatoires
   const generateNotes = useCallback(() => {
@@ -92,7 +97,14 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
     [currentNoteIndex, generatedNotes],
   );
 
-  // Configuration de la reconnaissance vocale
+  // Synchroniser les refs avec les dernières valeurs d'état
+  useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+  useEffect(() => { voiceErrorRef.current = voiceError; }, [voiceError]);
+  useEffect(() => { currentNoteIndexRef.current = currentNoteIndex; }, [currentNoteIndex]);
+  useEffect(() => { generatedNotesRef.current = generatedNotes; }, [generatedNotes]);
+  useEffect(() => { checkAnswerRef.current = checkAnswer; }, [checkAnswer]);
+
+  // Configuration de la reconnaissance vocale — initialisée une seule fois
   useEffect(() => {
     const SpeechRecognitionAPI =
       (window as any).SpeechRecognition ||
@@ -168,9 +180,9 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
           console.log("🎯 Note détectée:", foundNote);
           console.log(
             "🎵 Note attendue:",
-            generatedNotes[currentNoteIndex]?.note,
+            generatedNotesRef.current[currentNoteIndexRef.current]?.note,
           );
-          checkAnswer(foundNote);
+          checkAnswerRef.current(foundNote);
           setTranscript("");
         } else {
           console.log("❌ Aucune note détectée dans:", normalizedTranscript);
@@ -191,18 +203,20 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
       }
 
       setIsListening(false);
+      isListeningRef.current = false;
     };
 
     recognition.onend = () => {
       console.log("⏹️ Reconnaissance vocale terminée");
-      // Ne redémarre PAS automatiquement si erreur
-      if (isListening && !voiceError) {
+      // Ne redémarre PAS automatiquement si erreur ou arrêt intentionnel
+      if (isListeningRef.current && !voiceErrorRef.current) {
         console.log("🔄 Redémarrage de la reconnaissance...");
         try {
           recognition.start();
         } catch (e) {
           console.error("Impossible de redémarrer:", e);
           setIsListening(false);
+          isListeningRef.current = false;
         }
       }
     };
@@ -214,7 +228,7 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
         recognitionRef.current.stop();
       }
     };
-  }, [isListening, checkAnswer, voiceError, currentNoteIndex, generatedNotes]);
+  }, []);
 
   // Toggle reconnaissance vocale
   const toggleListening = () => {
@@ -225,6 +239,7 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
 
     if (isListening) {
       console.log("🛑 Arrêt de la dictée vocale");
+      isListeningRef.current = false;
       recognitionRef.current.stop();
       setIsListening(false);
       setTranscript("");
@@ -232,8 +247,10 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
       console.log("▶️ Démarrage de la dictée vocale");
       console.log("🎯 Note à trouver:", generatedNotes[currentNoteIndex]?.note);
       setVoiceError("");
+      voiceErrorRef.current = "";
       try {
         recognitionRef.current.start();
+        isListeningRef.current = true;
         setIsListening(true);
       } catch (e) {
         console.error("Erreur au démarrage:", e);
