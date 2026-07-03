@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { OboeKeys } from "../../constants/oboeFingerings";
 
 interface OboeFingeringChartProps {
@@ -15,6 +16,16 @@ export const OboeFingeringChart = ({
   height = 600,
   darkMode = false,
 }: OboeFingeringChartProps) => {
+  const uid = useId();
+  const ids = {
+    woodGrad: `${uid}-woodGrad`,
+    woodGrainVertical: `${uid}-woodGrainVertical`,
+    halfGrad: `${uid}-halfGrad`,
+    bodyShine: `${uid}-bodyShine`,
+    ivoryGrad: `${uid}-ivoryGrad`,
+    corkGrad: `${uid}-corkGrad`,
+  };
+
   const isPressed = (status: KeyStatus) =>
     status === true || status === "closed";
   const isHalf = (status: KeyStatus) => status === "half";
@@ -43,7 +54,7 @@ export const OboeFingeringChart = ({
     >
       <defs>
         {/* African blackwood gradient - realistic wood grain */}
-        <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={ids.woodGrad} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor={woodDarkest} />
           <stop offset="15%" stopColor={woodDark} />
           <stop offset="35%" stopColor={woodMid} />
@@ -55,7 +66,7 @@ export const OboeFingeringChart = ({
 
         {/* Vertical wood grain texture */}
         <linearGradient
-          id="woodGrainVertical"
+          id={ids.woodGrainVertical}
           x1="0%"
           y1="0%"
           x2="0%"
@@ -69,7 +80,7 @@ export const OboeFingeringChart = ({
         </linearGradient>
 
         {/* Half hole gradient - HORIZONTAL split (top white, bottom violet) */}
-        <linearGradient id="halfGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id={ids.halfGrad} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor={keyWhite} />
           <stop offset="45%" stopColor={keyWhite} />
           <stop offset="55%" stopColor={pressedColor} />
@@ -77,7 +88,7 @@ export const OboeFingeringChart = ({
         </linearGradient>
 
         {/* Cylindrical shine for wood body */}
-        <linearGradient id="bodyShine" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={ids.bodyShine} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="transparent" />
           <stop offset="30%" stopColor={woodHighlight} stopOpacity="0.15" />
           <stop offset="45%" stopColor="#fff" stopOpacity="0.08" />
@@ -87,7 +98,7 @@ export const OboeFingeringChart = ({
         </linearGradient>
 
         {/* Ivory/bone ring gradient */}
-        <linearGradient id="ivoryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={ids.ivoryGrad} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#D4C8B8" />
           <stop offset="30%" stopColor="#F5F0E6" />
           <stop offset="50%" stopColor="#FFFAF0" />
@@ -96,7 +107,7 @@ export const OboeFingeringChart = ({
         </linearGradient>
 
         {/* Cork texture for joints */}
-        <linearGradient id="corkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={ids.corkGrad} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#8B7355" />
           <stop offset="50%" stopColor="#A08060" />
           <stop offset="100%" stopColor="#8B7355" />
@@ -123,24 +134,24 @@ export const OboeFingeringChart = ({
       {/* Upper joint - main body with realistic taper */}
       <path
         d="M 90 28 L 85 265 L 115 265 L 110 28 Z"
-        fill="url(#woodGrad)"
+        fill={`url(#${ids.woodGrad})`}
         stroke={woodDarkest}
         strokeWidth="1"
       />
       {/* Wood grain texture overlay */}
       <path
         d="M 90 28 L 85 265 L 115 265 L 110 28 Z"
-        fill="url(#woodGrainVertical)"
+        fill={`url(#${ids.woodGrainVertical})`}
       />
       {/* Cylindrical shine */}
-      <path d="M 90 28 L 85 265 L 115 265 L 110 28 Z" fill="url(#bodyShine)" />
+      <path d="M 90 28 L 85 265 L 115 265 L 110 28 Z" fill={`url(#${ids.bodyShine})`} />
 
       {/* Top ring - ivory/bone decorative ring */}
       <ellipse cx="100" cy="28" rx="11" ry="3" fill={woodDarkest} />
-      <ellipse cx="100" cy="27" rx="10" ry="2.5" fill="url(#ivoryGrad)" />
+      <ellipse cx="100" cy="27" rx="10" ry="2.5" fill={`url(#${ids.ivoryGrad})`} />
 
       {/* Cork tenon ring at joint */}
-      <rect x="84" y="258" width="32" height="8" rx="1" fill="url(#corkGrad)" />
+      <rect x="84" y="258" width="32" height="8" rx="1" fill={`url(#${ids.corkGrad})`} />
 
       {/* Upper tenon ring */}
       <ellipse cx="100" cy="265" rx="16" ry="4" fill={woodDarkest} />
@@ -156,22 +167,22 @@ export const OboeFingeringChart = ({
       {/* Lower joint - with realistic taper */}
       <path
         d="M 85 275 L 78 555 L 122 555 L 115 275 Z"
-        fill="url(#woodGrad)"
+        fill={`url(#${ids.woodGrad})`}
         stroke={woodDarkest}
         strokeWidth="1"
       />
       <path
         d="M 85 275 L 78 555 L 122 555 L 115 275 Z"
-        fill="url(#woodGrainVertical)"
+        fill={`url(#${ids.woodGrainVertical})`}
       />
       <path
         d="M 85 275 L 78 555 L 122 555 L 115 275 Z"
-        fill="url(#bodyShine)"
+        fill={`url(#${ids.bodyShine})`}
       />
 
       {/* Socket ring */}
       <ellipse cx="100" cy="275" rx="16" ry="4" fill={woodDarkest} />
-      <ellipse cx="100" cy="276" rx="15" ry="3" fill="url(#ivoryGrad)" />
+      <ellipse cx="100" cy="276" rx="15" ry="3" fill={`url(#${ids.ivoryGrad})`} />
 
       {/* Bell shadow */}
       <path
@@ -183,18 +194,18 @@ export const OboeFingeringChart = ({
       {/* Bell - flared shape */}
       <path
         d="M 78 555 Q 72 580 65 605 Q 100 615 135 605 Q 128 580 122 555 Z"
-        fill="url(#woodGrad)"
+        fill={`url(#${ids.woodGrad})`}
         stroke={woodDarkest}
         strokeWidth="1"
       />
       <path
         d="M 78 555 Q 72 580 65 605 Q 100 615 135 605 Q 128 580 122 555 Z"
-        fill="url(#bodyShine)"
+        fill={`url(#${ids.bodyShine})`}
       />
 
       {/* Bell rim - ivory ring */}
       <ellipse cx="100" cy="605" rx="35" ry="8" fill={woodDarkest} />
-      <ellipse cx="100" cy="604" rx="34" ry="7" fill="url(#ivoryGrad)" />
+      <ellipse cx="100" cy="604" rx="34" ry="7" fill={`url(#${ids.ivoryGrad})`} />
 
       {/* Bell opening */}
       <ellipse cx="100" cy="605" rx="28" ry="5" fill={holeBlack} />
@@ -281,7 +292,7 @@ export const OboeFingeringChart = ({
           r="10"
           fill={
             isHalf(keys.l1 ?? "open")
-              ? "url(#halfGrad)"
+              ? `url(#${ids.halfGrad})`
               : isPressed(keys.l1 ?? "open")
                 ? pressedColor
                 : keyWhite
@@ -734,7 +745,7 @@ export const OboeFingeringChart = ({
           cx="130"
           cy="0"
           r="7"
-          fill="url(#halfGrad)"
+          fill={`url(#${ids.halfGrad})`}
           stroke={keyBorder}
           strokeWidth="1"
         />
