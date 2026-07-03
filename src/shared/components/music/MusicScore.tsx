@@ -1,40 +1,14 @@
 import { useEffect, useRef } from "react";
-
-// Map French note names to vertical steps relative to top line F5 (step 0)
-// Positive goes down (lower pitch), Negative goes up (higher pitch).
-// Step = distance in half-spaces (note heads)
-const NOTE_POSITIONS: Record<string, { step: number }> = {
-  "Si♭ Grave": { step: 11 },
-  "Si Grave": { step: 11 },
-
-  Do: { step: 10 },
-  "Do#": { step: 10 },
-
-  Ré: { step: 9 },
-  "Mi♭": { step: 8 },
-  Mi: { step: 8 },
-  Fa: { step: 7 },
-  "Fa#": { step: 7 },
-  Sol: { step: 6 },
-  "Sol#": { step: 6 },
-  La: { step: 5 },
-  "Si♭": { step: 4 },
-  Si: { step: 4 },
-
-  "Do Aigu": { step: 3 },
-  "Do# Aigu": { step: 3 },
-  "Ré Aigu": { step: 2 },
-  "Mi♭ Aigu": { step: 1 },
-  "Mi Aigu": { step: 1 },
-  "Fa Aigu": { step: 0 },
-  "Sol Aigu": { step: -1 },
-};
+import { noteStep } from "../../music/notes";
 
 interface MusicScoreProps {
   notes: string[];
   activeNote?: string;
-  onNoteClick: (note: string) => void;
+  onNoteClick?: (note: string) => void;
   darkMode?: boolean;
+  // Per-note color override (e.g. quiz status); wins over activeNote color.
+  noteColor?: (note: string, index: number) => string | undefined;
+  noteSpacing?: number;
 }
 
 export const MusicScore = ({
@@ -42,13 +16,14 @@ export const MusicScore = ({
   activeNote,
   onNoteClick,
   darkMode = false,
+  noteColor,
+  noteSpacing = 50,
 }: MusicScoreProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to active note
   useEffect(() => {
     if (activeNote && containerRef.current) {
-      // Find the active note element index
       const index = notes.indexOf(activeNote);
       if (index !== -1) {
         const element = document.getElementById(`note-${index}`);
@@ -66,15 +41,14 @@ export const MusicScore = ({
   const STAFF_Y_START = 50; // Moved down slightly to fit high notes
   const LINE_SPACING = 10; // Space between lines
   const STEP_HEIGHT = LINE_SPACING / 2; // 5px per note step
-  const NOTE_SPACING = 50;
   const START_OFFSET = 60; // Space for Clef
 
-  const width = START_OFFSET + notes.length * NOTE_SPACING + 40;
+  const width = START_OFFSET + notes.length * noteSpacing + 40;
   const height = 160;
 
   // Colors based on mode
   const staffColor = darkMode ? "#6b7280" : "#374151";
-  const noteColor = darkMode ? "#e5e5e5" : "#1f2937";
+  const baseNoteColor = darkMode ? "#e5e5e5" : "#1f2937";
   const activeColor = "#8B5CF6"; // violet
   const bgColor = darkMode ? "#1a1a1a" : "#f9fafb";
   const borderColor = darkMode ? "#374151" : "#e5e7eb";
@@ -115,7 +89,11 @@ export const MusicScore = ({
         transition: "all 0.3s ease",
       }}
     >
-      <svg width={width} height={height} className="mx-auto block">
+      <svg
+        width={width}
+        height={height}
+        style={{ display: "block", margin: "0 auto" }}
+      >
         {renderStaffLines()}
 
         {/* Treble Clef */}
@@ -124,27 +102,29 @@ export const MusicScore = ({
           y={STAFF_Y_START + 4 * LINE_SPACING - 5}
           fontFamily="serif"
           fontSize="65"
-          fill={noteColor}
+          fill={baseNoteColor}
         >
           𝄞
         </text>
 
         {notes.map((noteName, index) => {
-          const pos = NOTE_POSITIONS[noteName];
-          if (!pos) return null;
+          const step = noteStep(noteName);
+          if (step === null) return null;
 
-          const x = START_OFFSET + index * NOTE_SPACING;
+          const x = START_OFFSET + index * noteSpacing;
           // Calculate Y based on step relative to top line (F5)
-          const cy = STAFF_Y_START + pos.step * STEP_HEIGHT;
+          const cy = STAFF_Y_START + step * STEP_HEIGHT;
 
           const isActive = noteName === activeNote;
-          const currentNoteColor = isActive ? activeColor : noteColor;
+          const currentNoteColor =
+            noteColor?.(noteName, index) ??
+            (isActive ? activeColor : baseNoteColor);
 
           // Ledger lines
           const renderLedgerLines = () => {
             const lines = [];
             // Top ledger lines (if step <= -2) (A5 and above)
-            for (let s = -2; s >= pos.step; s -= 2) {
+            for (let s = -2; s >= step; s -= 2) {
               const ly = STAFF_Y_START + s * STEP_HEIGHT;
               lines.push(
                 <line
@@ -160,7 +140,7 @@ export const MusicScore = ({
             }
 
             // Bottom ledger lines (if step >= 10) (C4 and below)
-            for (let s = 10; s <= pos.step; s += 2) {
+            for (let s = 10; s <= step; s += 2) {
               const ly = STAFF_Y_START + s * STEP_HEIGHT;
               lines.push(
                 <line
@@ -179,19 +159,21 @@ export const MusicScore = ({
 
           return (
             <g
-              key={noteName}
+              key={index}
               id={`note-${index}`}
-              onClick={() => onNoteClick(noteName)}
-              className="cursor-pointer hover:opacity-70 transition-opacity"
+              onClick={onNoteClick ? () => onNoteClick(noteName) : undefined}
+              style={onNoteClick ? { cursor: "pointer" } : undefined}
             >
               {/* Hit area */}
-              <rect
-                x={x - 25}
-                y={0}
-                width={50}
-                height={height}
-                fill="transparent"
-              />
+              {onNoteClick && (
+                <rect
+                  x={x - noteSpacing / 2}
+                  y={0}
+                  width={noteSpacing}
+                  height={height}
+                  fill="transparent"
+                />
+              )}
 
               {renderLedgerLines()}
 
@@ -207,7 +189,7 @@ export const MusicScore = ({
 
               {/* Stem */}
               {/* Stem direction: usually down for B4 (center line) and above, up for below */}
-              {pos.step <= 4 ? (
+              {step <= 4 ? (
                 // Stem Down (from left side)
                 <line
                   x1={x - 6}
