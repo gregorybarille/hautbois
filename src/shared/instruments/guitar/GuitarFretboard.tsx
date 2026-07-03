@@ -131,7 +131,7 @@ export const GuitarFretboard = ({
       {open.map(({ string }) => (
         <circle
           key={`open-${string}`}
-          cx={NUT_X - 22}
+          cx={NUT_X - 15}
           cy={stringY(string)}
           r={8}
           fill="none"

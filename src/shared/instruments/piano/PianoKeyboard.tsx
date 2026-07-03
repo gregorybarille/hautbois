@@ -102,12 +102,11 @@ export const PianoKeyboard = ({
       {OCTAVE_LABELS.map((label, octave) => (
         <text
           key={label}
-          x={octave * 7 * WHITE_W + WHITE_W / 2}
+          x={octave * 7 * WHITE_W + 3}
           y={WHITE_H + 15}
           fontSize={10}
           fill={textColor}
           fontFamily="system-ui"
-          textAnchor="middle"
         >
           {label}
         </text>
