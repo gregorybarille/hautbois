@@ -12,21 +12,22 @@ import {
 } from "@mantine/core";
 import { Button, Card } from "../../shared/components";
 import { MusicScore } from "../../shared/components/music/MusicScore";
-import { OboeFingeringChart } from "../../shared/components/oboe/OboeFingeringChart";
-import { NOTES, OBOE_FINGERINGS } from "../../shared/constants/oboeFingerings";
+import { InstrumentConfig } from "../../shared/instruments";
 
 interface FingeringHelperProps {
   onBack: () => void;
+  instrument: InstrumentConfig;
 }
 
-export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
+export const FingeringHelper = ({ onBack, instrument }: FingeringHelperProps) => {
   const { t } = useTranslation();
   const [darkMode, setDarkMode] = useState(false);
+  const NOTES = instrument.notes;
 
   // Filter for natural notes only (no sharp or flat symbols)
   const naturalNotes = useMemo(
     () => NOTES.filter((n) => !n.includes("♭") && !n.includes("#")),
-    [],
+    [NOTES],
   );
 
   // Initialize with "Do" which is a safe middle note
@@ -49,7 +50,7 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
       ),
       natural: NOTES.find((n) => n === currentBaseNote),
     };
-  }, [currentBaseNote]);
+  }, [NOTES, currentBaseNote]);
 
   const handleScoreClick = (note: string) => {
     // When clicking score (natural note), reset to natural
@@ -106,12 +107,23 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
 
             <Flex
               gap="xl"
-              direction={{ base: "column", md: "row" }}
-              align={{ base: "center", md: "center" }}
+              // Wide charts (piano, guitar) stack under the staff
+              direction={
+                instrument.layout === "wide"
+                  ? "column"
+                  : { base: "column", md: "row" }
+              }
+              align="center"
               justify="space-between"
             >
               {/* Left side: Music score and variations */}
-              <Box style={{ flex: 1, maxWidth: 600 }}>
+              <Box
+                style={{
+                  flex: 1,
+                  maxWidth: 600,
+                  width: instrument.layout === "wide" ? "100%" : undefined,
+                }}
+              >
                 <MusicScore
                   notes={naturalNotes}
                   activeNote={currentBaseNote}
@@ -195,13 +207,14 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
                 </Box>
               </Box>
 
-              {/* Right side: Oboe fingering chart */}
+              {/* Right side: fingering chart for the selected instrument */}
               <Box
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   minWidth: 300,
+                  width: instrument.layout === "wide" ? "100%" : undefined,
                 }}
               >
                 <Title
@@ -212,9 +225,9 @@ export const FingeringHelper = ({ onBack }: FingeringHelperProps) => {
                 >
                   {selectedNote}
                 </Title>
-                <OboeFingeringChart
-                  keys={OBOE_FINGERINGS[selectedNote]}
-                  height={650}
+                <instrument.NoteChart
+                  note={selectedNote}
+                  height={instrument.layout === "wide" ? 220 : 650}
                   darkMode={darkMode}
                 />
               </Box>

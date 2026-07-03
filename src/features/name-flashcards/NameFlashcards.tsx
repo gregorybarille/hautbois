@@ -3,15 +3,16 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Info, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Box, Container, Title, Text, Modal, ActionIcon } from "@mantine/core";
 import { Button, Card } from "../../shared/components";
-import { OboeFingeringChart } from "../../shared/components/oboe/OboeFingeringChart";
-import { NOTES, OBOE_FINGERINGS } from "../../shared/constants/oboeFingerings";
+import { InstrumentConfig } from "../../shared/instruments";
 
 interface NameFlashcardsProps {
   onBack: () => void;
+  instrument: InstrumentConfig;
 }
 
-export const NameFlashcards = ({ onBack }: NameFlashcardsProps) => {
+export const NameFlashcards = ({ onBack, instrument }: NameFlashcardsProps) => {
   const { t } = useTranslation();
+  const NOTES = instrument.notes;
   const [currentNote, setCurrentNote] = useState<string>(NOTES[0]);
   const [isFingeringVisible, setIsFingeringVisible] = useState(false);
 
@@ -187,10 +188,7 @@ export const NameFlashcards = ({ onBack }: NameFlashcardsProps) => {
               padding: "1rem",
             }}
           >
-            <OboeFingeringChart
-              keys={OBOE_FINGERINGS[currentNote]}
-              height={400}
-            />
+            <instrument.NoteChart note={currentNote} height={400} />
           </Box>
         </Modal>
       </Container>

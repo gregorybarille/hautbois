@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, RefreshCw, Mic, MicOff } from "lucide-react";
 import {
@@ -18,6 +17,9 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { Button, Card } from "../../shared/components";
+import { MusicScore } from "../../shared/components/music/MusicScore";
+import { NOTE_BASES } from "../../shared/music/notes";
+import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
 
 interface ScoreFlashcardsProps {
   onBack: () => void;
@@ -30,23 +32,19 @@ interface NoteResult {
 }
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
-const NATURAL_NOTES = ["Do", "Ré", "Mi", "Fa", "Sol", "La", "Si"];
+const NATURAL_NOTES: string[] = NOTE_BASES;
+
+const STATUS_COLORS = {
+  current: "#3b82f6",
+  correct: "#22c55e",
+  incorrect: "#ef4444",
+};
 
 export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
   const { t } = useTranslation();
   const [generatedNotes, setGeneratedNotes] = useState<NoteResult[]>([]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [voiceSupported, setVoiceSupported] = useState(true);
-  const [voiceError, setVoiceError] = useState<string>("");
-  const recognitionRef = useRef<any>(null);
-  const isListeningRef = useRef(false);
-  const voiceErrorRef = useRef("");
-  const currentNoteIndexRef = useRef(0);
-  const generatedNotesRef = useRef<NoteResult[]>([]);
-  const checkAnswerRef = useRef<(note: string) => void>(() => {});
 
   // Générer 10 notes aléatoires
   const generateNotes = useCallback(() => {
@@ -97,170 +95,12 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
     [currentNoteIndex, generatedNotes],
   );
 
-  // Synchroniser les refs avec les dernières valeurs d'état
-  useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
-  useEffect(() => { voiceErrorRef.current = voiceError; }, [voiceError]);
-  useEffect(() => { currentNoteIndexRef.current = currentNoteIndex; }, [currentNoteIndex]);
-  useEffect(() => { generatedNotesRef.current = generatedNotes; }, [generatedNotes]);
-  useEffect(() => { checkAnswerRef.current = checkAnswer; }, [checkAnswer]);
-
-  // Configuration de la reconnaissance vocale — initialisée une seule fois
-  useEffect(() => {
-    const SpeechRecognitionAPI =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognitionAPI) {
-      setVoiceSupported(false);
-      return;
-    }
-
-    const recognition = new SpeechRecognitionAPI();
-    recognition.lang = "fr-FR";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (event: any) => {
-      const current = event.resultIndex;
-      const transcript = event.results[current][0].transcript
-        .toLowerCase()
-        .trim();
-
-      console.log("🎤 Transcript brut:", transcript);
-      console.log("📊 isFinal:", event.results[current].isFinal);
-
-      setTranscript(transcript);
-
-      if (event.results[current].isFinal) {
-        // Normaliser le transcript (enlever accents)
-        const normalizedTranscript = transcript
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-
-        console.log("🔄 Transcript normalisé:", normalizedTranscript);
-
-        // Mapping des variantes de prononciation
-        const noteMapping: Record<string, string> = {
-          do: "Do",
-          doh: "Do",
-          c: "Do",
-          re: "Ré",
-          ré: "Ré",
-          d: "Ré",
-          mi: "Mi",
-          e: "Mi",
-          fa: "Fa",
-          f: "Fa",
-          sol: "Sol",
-          g: "Sol",
-          la: "La",
-          a: "La",
-          si: "Si",
-          b: "Si",
-        };
-
-        // Chercher quelle note a été dite
-        const words = normalizedTranscript.split(/[^a-z]+/).filter(Boolean);
-        let foundNote: string | undefined;
-        for (const [variant, note] of Object.entries(noteMapping)) {
-          const hasMatch =
-            variant.length === 1
-              ? words.includes(variant)
-              : normalizedTranscript.includes(variant);
-          if (hasMatch) {
-            console.log(
-              `✅ Match trouvé! Variante "${variant}" → Note "${note}"`,
-            );
-            foundNote = note;
-            break;
-          }
-        }
-
-        if (foundNote) {
-          console.log("🎯 Note détectée:", foundNote);
-          console.log(
-            "🎵 Note attendue:",
-            generatedNotesRef.current[currentNoteIndexRef.current]?.note,
-          );
-          checkAnswerRef.current(foundNote);
-          setTranscript("");
-        } else {
-          console.log("❌ Aucune note détectée dans:", normalizedTranscript);
-        }
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error("❌ Erreur reconnaissance vocale:", event.error);
-      console.error("📝 Message:", event.message);
-
-      if (event.error === "network") {
-        setVoiceError("Erreur réseau : Vérifiez votre connexion internet");
-      } else if (event.error === "not-allowed") {
-        setVoiceError("Accès au microphone refusé");
-      } else {
-        setVoiceError(`Erreur : ${event.error}`);
-      }
-
-      setIsListening(false);
-      isListeningRef.current = false;
-    };
-
-    recognition.onend = () => {
-      console.log("⏹️ Reconnaissance vocale terminée");
-      // Ne redémarre PAS automatiquement si erreur ou arrêt intentionnel
-      if (isListeningRef.current && !voiceErrorRef.current) {
-        console.log("🔄 Redémarrage de la reconnaissance...");
-        try {
-          recognition.start();
-        } catch (e) {
-          console.error("Impossible de redémarrer:", e);
-          setIsListening(false);
-          isListeningRef.current = false;
-        }
-      }
-    };
-
-    recognitionRef.current = recognition;
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, []);
-
-  // Toggle reconnaissance vocale
-  const toggleListening = () => {
-    if (!recognitionRef.current) {
-      console.log("⚠️ Reconnaissance vocale non initialisée");
-      return;
-    }
-
-    if (isListening) {
-      console.log("🛑 Arrêt de la dictée vocale");
-      isListeningRef.current = false;
-      recognitionRef.current.stop();
-      setIsListening(false);
-      setTranscript("");
-    } else {
-      console.log("▶️ Démarrage de la dictée vocale");
-      console.log("🎯 Note à trouver:", generatedNotes[currentNoteIndex]?.note);
-      setVoiceError("");
-      voiceErrorRef.current = "";
-      try {
-        recognitionRef.current.start();
-        isListeningRef.current = true;
-        setIsListening(true);
-      } catch (e) {
-        console.error("Erreur au démarrage:", e);
-        setVoiceError("Impossible de démarrer la reconnaissance vocale");
-      }
-    }
-  };
+  const voice = useNoteSpeechRecognition(checkAnswer);
 
   // Calcul de la progression
-  const progress = generatedNotes.length ? (currentNoteIndex / generatedNotes.length) * 100 : 0;
+  const progress = generatedNotes.length
+    ? (currentNoteIndex / generatedNotes.length) * 100
+    : 0;
   const isComplete = currentNoteIndex >= generatedNotes.length;
 
   return (
@@ -289,16 +129,16 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
             Dictez ou cliquez sur la note correspondante
           </Text>
 
-          {!voiceSupported && (
+          {!voice.supported && (
             <Alert color="orange" title="Dictée vocale non disponible" mb="md">
               Votre navigateur ne supporte pas la reconnaissance vocale.
               Utilisez les boutons pour répondre.
             </Alert>
           )}
 
-          {voiceError && (
+          {voice.error && (
             <Alert color="red" title="Erreur de dictée vocale" mb="md">
-              {voiceError}. Utilisez les boutons pour répondre.
+              {voice.error}. Utilisez les boutons pour répondre.
             </Alert>
           )}
 
@@ -333,9 +173,14 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
               overflow: "hidden",
             }}
           >
-            <MusicalStaff
-              notes={generatedNotes}
-              currentIndex={currentNoteIndex}
+            <MusicScore
+              notes={generatedNotes.map((n) => n.note)}
+              noteSpacing={70}
+              noteColor={(_, index) => {
+                if (index === currentNoteIndex) return STATUS_COLORS.current;
+                const status = generatedNotes[index]?.status;
+                return status === "pending" ? undefined : STATUS_COLORS[status];
+              }}
             />
           </Paper>
 
@@ -346,32 +191,32 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
               <Group justify="center">
                 <Tooltip
                   label={
-                    !voiceSupported
+                    !voice.supported
                       ? "Dictée vocale non disponible sur ce navigateur"
-                      : isListening
+                      : voice.listening
                         ? "Arrêter la dictée"
                         : "Activer la dictée vocale"
                   }
                 >
                   <ActionIcon
-                    onClick={toggleListening}
+                    onClick={voice.toggle}
                     size="xl"
                     radius="xl"
-                    variant={isListening ? "filled" : "light"}
-                    color={isListening ? "red" : "blue"}
-                    disabled={!voiceSupported}
+                    variant={voice.listening ? "filled" : "light"}
+                    color={voice.listening ? "red" : "blue"}
+                    disabled={!voice.supported}
                     style={{
                       width: 60,
                       height: 60,
                     }}
                   >
-                    {isListening ? <MicOff size={28} /> : <Mic size={28} />}
+                    {voice.listening ? <MicOff size={28} /> : <Mic size={28} />}
                   </ActionIcon>
                 </Tooltip>
               </Group>
 
               {/* Transcript */}
-              {transcript && (
+              {voice.transcript && (
                 <Paper
                   p="md"
                   bg="blue.0"
@@ -385,7 +230,7 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
                     🎤 Vous dites :
                   </Text>
                   <Text size="lg" fw={500} c="blue.7">
-                    {transcript}
+                    {voice.transcript}
                   </Text>
                 </Paper>
               )}
@@ -459,160 +304,5 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
         </Card>
       </Container>
     </Box>
-  );
-};
-
-// Composant pour afficher la partition musicale
-interface MusicalStaffProps {
-  notes: NoteResult[];
-  currentIndex: number;
-}
-
-const MusicalStaff = ({ notes, currentIndex }: MusicalStaffProps) => {
-  // Positions des notes sur la portée (relatif à la ligne supérieure)
-  const NOTE_POSITIONS: Record<string, { step: number }> = {
-    Do: { step: 10 },
-    "Do#": { step: 10 },
-    Ré: { step: 9 },
-    "Mi♭": { step: 8 },
-    Mi: { step: 8 },
-    Fa: { step: 7 },
-    "Fa#": { step: 7 },
-    Sol: { step: 6 },
-    "Sol#": { step: 6 },
-    La: { step: 5 },
-    "Si♭": { step: 4 },
-    Si: { step: 4 },
-  };
-
-  const STAFF_Y_START = 50;
-  const LINE_SPACING = 10;
-  const STEP_HEIGHT = LINE_SPACING / 2;
-  const NOTE_SPACING = 70;
-  const START_OFFSET = 80;
-
-  const width = START_OFFSET + notes.length * NOTE_SPACING + 40;
-  const height = 160;
-
-  const renderStaffLines = () => {
-    const lines = [];
-    for (let i = 0; i < 5; i++) {
-      const y = STAFF_Y_START + i * LINE_SPACING;
-      lines.push(
-        <line
-          key={i}
-          x1={0}
-          y1={y}
-          x2={width}
-          y2={y}
-          stroke="#374151"
-          strokeWidth="1.5"
-        />,
-      );
-    }
-    return lines;
-  };
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        overflowX: "auto",
-        scrollBehavior: "smooth",
-      }}
-    >
-      <svg
-        width={width}
-        height={height}
-        style={{ display: "block", margin: "0 auto", maxWidth: "100%" }}
-      >
-        {renderStaffLines()}
-
-        {/* Clé de Sol */}
-        <text
-          x={10}
-          y={STAFF_Y_START + 4 * LINE_SPACING - 5}
-          fontFamily="serif"
-          fontSize="65"
-          fill="#1f2937"
-        >
-          𝄞
-        </text>
-
-        {notes.map((noteResult, index) => {
-          const pos = NOTE_POSITIONS[noteResult.note];
-          if (!pos) return null;
-
-          const x = START_OFFSET + index * NOTE_SPACING;
-          const cy = STAFF_Y_START + pos.step * STEP_HEIGHT;
-
-          let noteColor = "#1f2937";
-          if (noteResult.status === "correct") noteColor = "#22c55e";
-          if (noteResult.status === "incorrect") noteColor = "#ef4444";
-          if (index === currentIndex) noteColor = "#3b82f6";
-
-          // Lignes supplémentaires si nécessaire
-          const renderLedgerLines = () => {
-            const lines = [];
-            // Lignes en dessous de la portée
-            for (let s = 10; s <= pos.step; s += 2) {
-              const ly = STAFF_Y_START + s * STEP_HEIGHT;
-              lines.push(
-                <line
-                  key={`bot-${s}`}
-                  x1={x - 14}
-                  y1={ly}
-                  x2={x + 14}
-                  y2={ly}
-                  stroke="#374151"
-                  strokeWidth="1.5"
-                />,
-              );
-            }
-            return lines;
-          };
-
-          return (
-            <g key={`${noteResult.note}-${index}`}>
-              {renderLedgerLines()}
-
-              {/* Tête de note */}
-              <ellipse
-                cx={x}
-                cy={cy}
-                rx={8}
-                ry={6}
-                fill={noteColor}
-                transform={`rotate(-20 ${x} ${cy})`}
-                style={{
-                  transition: "fill 0.3s ease",
-                }}
-              />
-
-              {/* Hampe */}
-              {pos.step <= 4 ? (
-                <line
-                  x1={x - 7}
-                  y1={cy}
-                  x2={x - 7}
-                  y2={cy + 35}
-                  stroke={noteColor}
-                  strokeWidth="2"
-                />
-              ) : (
-                <line
-                  x1={x + 7}
-                  y1={cy}
-                  x2={x + 7}
-                  y2={cy - 35}
-                  stroke={noteColor}
-                  strokeWidth="2"
-                />
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
   );
 };
