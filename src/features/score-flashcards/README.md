@@ -25,7 +25,7 @@ La fonctionnalité **Cartes-Partition** permet aux musiciens de s'entraîner à 
 
 ### 🔄 Contrôles
 - Bouton pour démarrer/arrêter la reconnaissance vocale
-- Boutons de validation manuelle (Correct/Incorrect)
+- Grille de boutons (Do, Ré, Mi, ...) pour répondre manuellement
 - Bouton de rafraîchissement pour générer une nouvelle série
 - Progression visuelle avec barre de progression
 
