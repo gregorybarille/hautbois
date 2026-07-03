@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 // Grows as instruments are added.
-export type InstrumentId = "oboe";
+export type InstrumentId = "oboe" | "flute";
 
 export interface NoteChartProps {
   // French note name taken from this instrument's `notes` list.
