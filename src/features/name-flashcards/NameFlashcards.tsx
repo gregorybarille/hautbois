@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Info, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { Box, Container, Title, Text, Modal, ActionIcon } from "@mantine/core";
-import { Button, Card } from "../../shared/components";
+import { Info, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useTheme } from "@/shared/theme/ThemeProvider";
 import { InstrumentConfig } from "../../shared/instruments";
 
 interface NameFlashcardsProps {
-  onBack: () => void;
   instrument: InstrumentConfig;
 }
 
-export const NameFlashcards = ({ onBack, instrument }: NameFlashcardsProps) => {
+export const NameFlashcards = ({ instrument }: NameFlashcardsProps) => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const NOTES = instrument.notes;
   const [currentNote, setCurrentNote] = useState<string>(NOTES[0]);
   const [isFingeringVisible, setIsFingeringVisible] = useState(false);
@@ -35,163 +42,77 @@ export const NameFlashcards = ({ onBack, instrument }: NameFlashcardsProps) => {
     if (noteStr.includes("Grave")) {
       const noteName = noteStr.replace(" Grave", "");
       return (
-        <div
-          style={{
-            position: "relative",
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-        >
+        <span className="relative inline-flex items-center">
           <span>{noteName}</span>
           <ArrowDownRight
-            style={{
-              position: "absolute",
-              left: "100%",
-              marginLeft: "0.5rem",
-              width: 96,
-              height: 96,
-              color: "#fa5252",
-            }}
+            className="absolute left-full ml-2 size-20 text-red-500"
             strokeWidth={2}
           />
-        </div>
+        </span>
       );
     }
     if (noteStr.includes("Aigu")) {
       const noteName = noteStr.replace(" Aigu", "");
       return (
-        <div
-          style={{
-            position: "relative",
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-        >
+        <span className="relative inline-flex items-center">
           <span>{noteName}</span>
           <ArrowUpRight
-            style={{
-              position: "absolute",
-              left: "100%",
-              marginLeft: "0.5rem",
-              width: 96,
-              height: 96,
-              color: "#228be6",
-            }}
+            className="absolute left-full ml-2 size-20 text-blue-500"
             strokeWidth={2}
           />
-        </div>
+        </span>
       );
     }
     return <span>{noteStr}</span>;
   };
 
   return (
-    <Box
-      style={{
-        minHeight: "100vh",
-        background: "#f5f5f5",
-        padding: "2rem",
-      }}
-    >
-      <Container size="sm">
-        <Box mb="xl">
-          <Button
-            onClick={onBack}
-            variant="subtle"
-            leftSection={<ArrowLeft size={20} />}
-          >
-            {t("common.back")}
-          </Button>
-        </Box>
+    <div className="mx-auto flex h-full w-full max-w-xl flex-col">
+      <h2 className="mb-6 text-center text-2xl font-bold text-foreground sm:text-3xl">
+        {t("menu.nameFlashcards.title")}
+      </h2>
 
-        <Title order={2} size="2rem" ta="center" mb="xl">
-          {t("menu.nameFlashcards.title")}
-        </Title>
-
-        {/* Flashcard container */}
-        <Box style={{ position: "relative", width: "100%" }}>
-          <Card
-            onClick={nextNote}
-            noPadding
-            shadow="lg"
-            hover
-            style={{
-              height: 320,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              position: "relative",
-              userSelect: "none",
-            }}
-          >
-            {/* Info Button positioned absolute within the card */}
-            <ActionIcon
-              onClick={toggleFingering}
-              variant="subtle"
-              color="blue"
-              size="lg"
-              radius="xl"
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                zIndex: 10,
-              }}
-              aria-label="Show Fingering"
-            >
-              <Info size={24} />
-            </ActionIcon>
-
-            <Text
-              size="6rem"
-              fw={900}
-              c="blue.6"
-              style={{ fontSize: "6rem", lineHeight: 1 }}
-            >
-              {renderNoteDisplay(currentNote)}
-            </Text>
-            <Text
-              size="sm"
-              c="dimmed"
-              fw={500}
-              tt="uppercase"
-              style={{
-                position: "absolute",
-                bottom: 24,
-                letterSpacing: "0.1em",
-              }}
-            >
-              Tap for next
-            </Text>
-          </Card>
-        </Box>
-
-        {/* Fingering Modal */}
-        <Modal
-          opened={isFingeringVisible}
-          onClose={() => setIsFingeringVisible(false)}
-          title={
-            <Title order={3} size="1.5rem">
-              Doigté : {currentNote}
-            </Title>
-          }
-          size="md"
-          centered
+      <div className="flex min-h-0 flex-1 items-center justify-center">
+        <Card
+          onClick={nextNote}
+          className="relative flex aspect-[4/3] max-h-[60vh] w-full cursor-pointer items-center justify-center p-0 shadow-lg transition-all select-none hover:-translate-y-1 hover:shadow-xl"
         >
-          <Box
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              background: "white",
-              borderRadius: 12,
-              padding: "1rem",
-            }}
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            onClick={toggleFingering}
+            aria-label="Show Fingering"
+            className="absolute top-4 right-4 z-10 rounded-full text-blue-600 dark:text-blue-400"
           >
-            <instrument.NoteChart note={currentNote} height={400} />
-          </Box>
-        </Modal>
-      </Container>
-    </Box>
+            <Info className="size-6" />
+          </Button>
+
+          <span className="text-7xl leading-none font-black text-blue-600 sm:text-8xl dark:text-blue-400">
+            {renderNoteDisplay(currentNote)}
+          </span>
+
+          <span className="absolute bottom-6 text-sm font-medium tracking-widest text-muted-foreground uppercase">
+            Tap for next
+          </span>
+        </Card>
+      </div>
+
+      <Dialog open={isFingeringVisible} onOpenChange={setIsFingeringVisible}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              Doigté : {currentNote}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex max-h-[70vh] justify-center overflow-auto rounded-xl bg-card p-4">
+            <instrument.NoteChart
+              note={currentNote}
+              height={360}
+              darkMode={theme === "dark"}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
