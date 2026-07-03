@@ -346,9 +346,6 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
                     style={{
                       width: 60,
                       height: 60,
-                      animation: isListening
-                        ? "pulse 2s ease-in-out infinite"
-                        : "none",
                     }}
                   >
                     {isListening ? <MicOff size={28} /> : <Mic size={28} />}
