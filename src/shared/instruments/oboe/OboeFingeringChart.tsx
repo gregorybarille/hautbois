@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { OboeKeys } from "../../constants/oboeFingerings";
+import { OboeKeys } from "./fingerings";
 
 interface OboeFingeringChartProps {
   keys?: Partial<OboeKeys>;

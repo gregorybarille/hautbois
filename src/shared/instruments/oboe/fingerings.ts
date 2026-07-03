@@ -145,5 +145,3 @@ export const OBOE_FINGERINGS: Record<string, Partial<OboeKeys>> = {
   },
   "Sol Aigu": { l1: "half", l2: true, l3: true, octave3: true }, // Often octave 2 or 3 depending on model
 };
-
-export const NOTES = Object.keys(OBOE_FINGERINGS);

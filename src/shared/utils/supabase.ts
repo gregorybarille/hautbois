@@ -1,3 +1,4 @@
+// Intentionally unused for now — kept for a future backend (Supabase or a Railway API).
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

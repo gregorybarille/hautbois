@@ -1,10 +1,17 @@
 {
   "app": {
     "title": "Assistant Hautbois",
-    "description": "Améliorez votre pratique du hautbois"
+    "description": "Améliorez votre pratique musicale"
+  },
+  "instruments": {
+    "oboe": "Hautbois",
+    "flute": "Flûte traversière",
+    "piano": "Piano",
+    "guitar": "Guitare"
   },
   "menu": {
     "title": "Menu Principal",
+    "instrumentPicker": "Instrument",
     "scoreFlashcards": {
       "title": "Cartes - Partition",
       "description": "Pratiquez la lecture de notes sur une partition"
@@ -15,7 +22,7 @@
     },
     "fingeringHelper": {
       "title": "Guide des Doigtés",
-      "description": "Découvrez comment jouer chaque note sur le hautbois"
+      "description": "Découvrez comment jouer chaque note sur votre instrument"
     }
   },
   "common": {

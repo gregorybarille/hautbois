@@ -1,3 +1,6 @@
+// Intentionally unused for now — DB-side shapes kept for a future backend
+// (Supabase or a Railway API). FingeringData deliberately differs from the
+// in-app instrument key types (see src/shared/instruments/).
 export interface Note {
   id: string;
   name: string;
