@@ -57,7 +57,7 @@ export function parseNote(name: string): ParsedNote | null {
   let register: Register = "middle";
   if (rest.endsWith(" Grave")) {
     register = "grave";
-    rest = rest.slice(0, -" Grave".length);
+    rest = rest.slice(0, -(" Grave".length));
   } else if (rest.endsWith(" Aigu")) {
     register = "aigu";
     rest = rest.slice(0, -" Aigu".length);
