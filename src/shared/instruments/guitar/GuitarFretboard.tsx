@@ -1,172 +1,122 @@
 import { PRESSED_COLOR } from "../chartTheme";
-import {
-  getFretPositions,
-  MAX_FRET,
-  OPEN_STRING_LABELS,
-} from "./positions";
+import type { ChordFingering } from "./chords";
 
-interface GuitarFretboardProps {
-  note: string;
-  className?: string;
+interface Props {
+  chord: ChordFingering;
   darkMode?: boolean;
+  className?: string;
 }
 
-const NUT_X = 60;
-const FRET_SPACING = 55;
-const STRING_SPACING = 30;
-const TOP_Y = 30;
-const BOTTOM_Y = TOP_Y + 5 * STRING_SPACING;
-const WIDTH = NUT_X + MAX_FRET * FRET_SPACING + 20;
-const HEIGHT = BOTTOM_Y + 45;
+const STRINGS = 6;
+const S = 28; // spacing between strings
+const F = 38; // spacing between fret slots
+const FRETS_SHOWN = 5;
+const LEFT = 22;
+const TOP = 58; // room for string labels + muted/open markers
+const RIGHT = 28;
+const BOT = 16;
 
-// Frets with inlay dots (double dot at 12)
-const INLAY_FRETS = [3, 5, 7, 9];
+const W = LEFT + (STRINGS - 1) * S + RIGHT;
+const H = TOP + FRETS_SHOWN * F + BOT;
 
-// y position of a string; string 0 (low Mi) is at the bottom
-const stringY = (string: number) => BOTTOM_Y - string * STRING_SPACING;
-// x position of a dot within a fret
-const fretX = (fret: number) => NUT_X + (fret - 0.5) * FRET_SPACING;
+const sx = (s: number) => LEFT + s * S;
+const fy = (offset: number) => TOP + offset * F;
+const dotY = (fret: number, base: number) => TOP + (fret - base) * F + F / 2;
 
-export const GuitarFretboard = ({
-  note,
-  className = "",
-  darkMode = false,
-}: GuitarFretboardProps) => {
-  const boardFill = darkMode ? "#2a1f1a" : "#8B5A2B";
-  const fretColor = darkMode ? "#9ca3af" : "#d1d5db";
-  const nutColor = darkMode ? "#e5e5e5" : "#F5F0E6";
-  const stringColor = darkMode ? "#d1d5db" : "#e8e0d0";
-  const inlayColor = darkMode ? "#6b7280" : "#D4C8B8";
+const STRING_LABELS = ["Mi", "La", "Ré", "Sol", "Si", "Mi"]; // low → high
+
+// Exported as GuitarChordDiagram so the name reflects the new design
+export const GuitarChordDiagram = ({ chord, darkMode = false, className = "" }: Props) => {
   const textColor = darkMode ? "#e5e5e5" : "#4B5563";
+  const lineColor = darkMode ? "#9ca3af" : "#374151";
+  const nutColor = darkMode ? "#e5e5e5" : "#1f2937";
 
-  const positions = getFretPositions(note);
-  const fretted = positions.filter((p) => p.fret > 0);
-  const open = positions.filter((p) => p.fret === 0);
+  const pressedFrets = chord.strings.filter((f) => f > 0);
+  const hasOpen = chord.strings.some((f) => f === 0);
+  // Show nut when any open string is present or when pressed frets start at 1
+  const baseFret =
+    hasOpen || pressedFrets.length === 0
+      ? 1
+      : Math.min(...pressedFrets);
+  const showNut = baseFret === 1;
 
   return (
-    <svg
-      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-      className={className}
-      style={{ width: "100%", maxWidth: WIDTH, height: "auto" }}
-    >
-      {/* Fretboard */}
-      <rect
-        x={NUT_X}
-        y={TOP_Y - 12}
-        width={MAX_FRET * FRET_SPACING}
-        height={BOTTOM_Y - TOP_Y + 24}
-        rx={4}
-        fill={boardFill}
-      />
-
-      {/* Nut */}
-      <rect
-        x={NUT_X - 5}
-        y={TOP_Y - 12}
-        width={5}
-        height={BOTTOM_Y - TOP_Y + 24}
-        fill={nutColor}
-      />
-
-      {/* Inlay dots */}
-      {INLAY_FRETS.map((fret) => (
-        <circle
-          key={fret}
-          cx={fretX(fret)}
-          cy={(TOP_Y + BOTTOM_Y) / 2}
-          r={6}
-          fill={inlayColor}
-        />
-      ))}
-      <circle
-        cx={fretX(12)}
-        cy={(TOP_Y + BOTTOM_Y) / 2 - STRING_SPACING}
-        r={6}
-        fill={inlayColor}
-      />
-      <circle
-        cx={fretX(12)}
-        cy={(TOP_Y + BOTTOM_Y) / 2 + STRING_SPACING}
-        r={6}
-        fill={inlayColor}
-      />
-
-      {/* Frets */}
-      {Array.from({ length: MAX_FRET }, (_, i) => i + 1).map((fret) => (
-        <line
-          key={fret}
-          x1={NUT_X + fret * FRET_SPACING}
-          y1={TOP_Y - 12}
-          x2={NUT_X + fret * FRET_SPACING}
-          y2={BOTTOM_Y + 12}
-          stroke={fretColor}
-          strokeWidth="2"
-        />
-      ))}
-
-      {/* Strings (thicker = lower) */}
-      {OPEN_STRING_LABELS.map((label, string) => (
-        <g key={string}>
-          <line
-            x1={NUT_X - 5}
-            y1={stringY(string)}
-            x2={NUT_X + MAX_FRET * FRET_SPACING}
-            y2={stringY(string)}
-            stroke={stringColor}
-            strokeWidth={2.5 - string * 0.3}
-          />
-          <text
-            x={15}
-            y={stringY(string) + 4}
-            fontSize={12}
-            fill={textColor}
-            fontFamily="system-ui"
-          >
-            {label}
-          </text>
-        </g>
-      ))}
-
-      {/* Open-string positions (circle left of the nut) */}
-      {open.map(({ string }) => (
-        <circle
-          key={`open-${string}`}
-          cx={NUT_X - 15}
-          cy={stringY(string)}
-          r={8}
-          fill="none"
-          stroke={PRESSED_COLOR}
-          strokeWidth="3"
-        />
-      ))}
-
-      {/* Fretted positions */}
-      {fretted.map(({ string, fret }) => (
-        <circle
-          key={`${string}-${fret}`}
-          cx={fretX(fret)}
-          cy={stringY(string)}
-          r={10}
-          fill={PRESSED_COLOR}
-          stroke={darkMode ? "#1a1a1a" : "#ffffff"}
-          strokeWidth="2"
-        />
-      ))}
-
-      {/* Fret numbers */}
-      {[...INLAY_FRETS, 12].map((fret) => (
-        <text
-          key={fret}
-          x={fretX(fret)}
-          y={BOTTOM_Y + 34}
-          fontSize={12}
-          fill={textColor}
-          fontFamily="system-ui"
-          textAnchor="middle"
-        >
-          {fret}
+    <svg viewBox={`0 0 ${W} ${H}`} className={className} style={{ width: "100%", maxWidth: W, height: "auto" }}>
+      {/* String names */}
+      {STRING_LABELS.map((label, s) => (
+        <text key={s} x={sx(s)} y={16} textAnchor="middle" fontSize={10} fill={textColor} fontFamily="system-ui">
+          {label}
         </text>
       ))}
+
+      {/* Muted (✕) or open (○) markers above the nut */}
+      {chord.strings.map((fret, s) => {
+        if (fret === 0) {
+          return <circle key={s} cx={sx(s)} cy={36} r={6} fill="none" stroke={PRESSED_COLOR} strokeWidth={1.5} />;
+        }
+        if (fret < 0) {
+          const cx = sx(s);
+          return (
+            <g key={s}>
+              <line x1={cx - 5} y1={31} x2={cx + 5} y2={41} stroke={textColor} strokeWidth={1.5} />
+              <line x1={cx + 5} y1={31} x2={cx - 5} y2={41} stroke={textColor} strokeWidth={1.5} />
+            </g>
+          );
+        }
+        return null;
+      })}
+
+      {/* Nut or fret-position label */}
+      {showNut ? (
+        <rect x={sx(0)} y={TOP - 6} width={(STRINGS - 1) * S} height={8} rx={2} fill={nutColor} />
+      ) : (
+        <text
+          x={W - 2}
+          y={fy(0) + F / 2 + 4}
+          textAnchor="end"
+          fontSize={12}
+          fontWeight="bold"
+          fill={textColor}
+          fontFamily="system-ui"
+        >
+          {baseFret}
+        </text>
+      )}
+
+      {/* Fret lines */}
+      {Array.from({ length: FRETS_SHOWN + 1 }, (_, i) => (
+        <line key={i} x1={sx(0)} y1={fy(i)} x2={sx(STRINGS - 1)} y2={fy(i)} stroke={lineColor} strokeWidth={1} />
+      ))}
+
+      {/* String lines (thicker for lower strings) */}
+      {Array.from({ length: STRINGS }, (_, s) => (
+        <line key={s} x1={sx(s)} y1={fy(0)} x2={sx(s)} y2={fy(FRETS_SHOWN)} stroke={lineColor} strokeWidth={1.3 - s * 0.15} />
+      ))}
+
+      {/* Barre bar */}
+      {chord.barre && (
+        <rect
+          x={sx(chord.barre.fromString) - 11}
+          y={dotY(chord.barre.fret, baseFret) - 11}
+          width={sx(chord.barre.toString) - sx(chord.barre.fromString) + 22}
+          height={22}
+          rx={11}
+          fill={PRESSED_COLOR}
+        />
+      )}
+
+      {/* Individual finger dots (skipped when covered by barre) */}
+      {chord.strings.map((fret, s) => {
+        if (fret <= 0) return null;
+        if (
+          chord.barre &&
+          fret === chord.barre.fret &&
+          s >= chord.barre.fromString &&
+          s <= chord.barre.toString
+        )
+          return null;
+        return <circle key={s} cx={sx(s)} cy={dotY(fret, baseFret)} r={11} fill={PRESSED_COLOR} />;
+      })}
     </svg>
   );
 };

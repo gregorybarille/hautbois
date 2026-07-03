@@ -1,15 +1,15 @@
 import { InstrumentConfig } from "../types";
-import { CHROMATIC_NOTES } from "../../music/notes";
-import { GuitarFretboard } from "./GuitarFretboard";
+import { GUITAR_CHORDS, GUITAR_NOTES } from "./chords";
+import { GuitarChordDiagram } from "./GuitarFretboard";
 
 export const guitar: InstrumentConfig = {
   id: "guitar",
   labelKey: "instruments.guitar",
-  // Pitch classes only: the fretboard shows every position of the note,
-  // so register suffixes would be redundant.
-  notes: CHROMATIC_NOTES,
+  notes: GUITAR_NOTES,
   layout: "wide",
-  NoteChart: ({ note, darkMode }) => (
-    <GuitarFretboard note={note} darkMode={darkMode} />
-  ),
+  NoteChart: ({ note, darkMode }) => {
+    const chord = GUITAR_CHORDS[note];
+    if (!chord) return null;
+    return <GuitarChordDiagram chord={chord} darkMode={darkMode} />;
+  },
 };
