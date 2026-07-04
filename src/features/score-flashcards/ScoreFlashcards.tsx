@@ -137,7 +137,7 @@ export const ScoreFlashcards = () => {
       </div>
 
       {/* Partition musicale */}
-      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-gradient-to-b from-white to-slate-50 p-4 shadow-[0_4px_12px_rgba(34,139,230,0.1)] dark:from-slate-900 dark:to-slate-950">
+      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-white p-4 dark:bg-slate-900">
         <MusicScore
           notes={generatedNotes.map((n) => n.note)}
           noteSpacing={70}
@@ -214,7 +214,7 @@ export const ScoreFlashcards = () => {
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5">
-          <div className="rounded-xl bg-gradient-to-br from-green-100 to-sky-100 p-8 text-center dark:from-green-950/50 dark:to-sky-950/50">
+          <div className="rounded-xl border border-green-500/30 bg-green-50 p-8 text-center dark:bg-green-950/40">
             <p className="mb-3 text-xl font-bold text-green-800 dark:text-green-300">
               ✅ Exercice terminé !
             </p>
