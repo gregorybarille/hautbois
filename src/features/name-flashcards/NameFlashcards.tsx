@@ -75,7 +75,7 @@ export const NameFlashcards = ({ instrument }: NameFlashcardsProps) => {
       <div className="flex min-h-0 flex-1 items-center justify-center">
         <Card
           onClick={nextNote}
-          className="relative flex aspect-[4/3] max-h-[60vh] w-full cursor-pointer items-center justify-center p-0 shadow-lg transition-all select-none hover:-translate-y-1 hover:shadow-xl"
+          className="relative flex aspect-[4/3] max-h-[60vh] w-full cursor-pointer items-center justify-center p-0 transition-colors select-none hover:border-primary/40"
         >
           <Button
             variant="ghost"

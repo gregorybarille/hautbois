@@ -13,9 +13,9 @@ export interface ChartTheme {
 
 export const chartTheme = (darkMode: boolean): ChartTheme => ({
   pressed: PRESSED_COLOR,
-  keyWhite: darkMode ? "#e5e5e5" : "#FFFFFF",
-  keyBorder: darkMode ? "#666666" : "#888888",
-  text: darkMode ? "#e5e5e5" : "#4B5563",
-  legendBg: darkMode ? "#1a1a1a" : "#F9FAFB",
-  legendBorder: darkMode ? "#374151" : "#E5E7EB",
+  keyWhite: darkMode ? "#e2e8f0" : "#f8fafc", // slate-200 / slate-50
+  keyBorder: darkMode ? "#64748b" : "#94a3b8", // slate-500 / slate-400
+  text: darkMode ? "#e2e8f0" : "#475569", // slate-200 / slate-600
+  legendBg: darkMode ? "#0f172a" : "#f8fafc", // slate-900 / slate-50
+  legendBorder: darkMode ? "#334155" : "#e2e8f0", // slate-700 / slate-200
 });

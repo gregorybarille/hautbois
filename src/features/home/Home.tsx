@@ -1,5 +1,13 @@
 import { useTranslation } from "react-i18next";
-import { Music, FileText, HandMetal } from "lucide-react";
+import {
+  Music,
+  FileText,
+  HandMetal,
+  ListMusic,
+  Ear,
+  Drum,
+  LineChart,
+} from "lucide-react";
 import { MenuCard, View } from "@/shared/components";
 
 interface HomeProps {
@@ -20,7 +28,7 @@ export const Home = ({ onNavigate }: HomeProps) => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <MenuCard
           title={t("menu.scoreFlashcards.title")}
           description={t("menu.scoreFlashcards.description")}
@@ -38,6 +46,30 @@ export const Home = ({ onNavigate }: HomeProps) => {
           description={t("menu.fingeringHelper.description")}
           icon={HandMetal}
           onClick={() => onNavigate("fingeringHelper")}
+        />
+        <MenuCard
+          title={t("menu.scales.title")}
+          description={t("menu.scales.description")}
+          icon={ListMusic}
+          onClick={() => onNavigate("scales")}
+        />
+        <MenuCard
+          title={t("menu.earTraining.title")}
+          description={t("menu.earTraining.description")}
+          icon={Ear}
+          onClick={() => onNavigate("earTraining")}
+        />
+        <MenuCard
+          title={t("menu.rhythm.title")}
+          description={t("menu.rhythm.description")}
+          icon={Drum}
+          onClick={() => onNavigate("rhythm")}
+        />
+        <MenuCard
+          title={t("menu.progress.title")}
+          description={t("menu.progress.description")}
+          icon={LineChart}
+          onClick={() => onNavigate("progress")}
         />
       </div>
     </div>

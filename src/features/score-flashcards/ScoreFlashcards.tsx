@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshCw, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import {
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { NOTE_BASES } from "../../shared/music/notes";
 import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
+import { review, selectPractice } from "../../shared/srs/scheduler";
+import { DECK } from "../../shared/srs/decks";
+import { recordSession } from "../../shared/progress/history";
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
 const NATURAL_NOTES: string[] = NOTE_BASES;
@@ -34,19 +37,14 @@ export const ScoreFlashcards = () => {
   const [generatedNotes, setGeneratedNotes] = useState<NoteResult[]>([]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
+  // Ensure each completed round is logged to history exactly once.
+  const recorded = useRef(false);
 
-  // Générer 10 notes aléatoires
+  // Générer 10 notes en privilégiant les notes les moins maîtrisées
   const generateNotes = useCallback(() => {
-    const notes: NoteResult[] = [];
-    for (let i = 0; i < 10; i++) {
-      const randomNote =
-        NATURAL_NOTES[Math.floor(Math.random() * NATURAL_NOTES.length)];
-      notes.push({
-        note: randomNote,
-        status: "pending",
-      });
-    }
-    setGeneratedNotes(notes);
+    recorded.current = false;
+    const drawn = selectPractice(DECK.notes, NATURAL_NOTES, 10);
+    setGeneratedNotes(drawn.map((note) => ({ note, status: "pending" })));
     setCurrentNoteIndex(0);
     setScore({ correct: 0, incorrect: 0 });
   }, []);
@@ -72,6 +70,9 @@ export const ScoreFlashcards = () => {
       };
       setGeneratedNotes(newNotes);
 
+      // Mettre à jour la répétition espacée (persistée)
+      review(DECK.notes, currentNote, isCorrect);
+
       // Mettre à jour le score
       setScore((prev) => ({
         correct: prev.correct + (isCorrect ? 1 : 0),
@@ -91,6 +92,14 @@ export const ScoreFlashcards = () => {
     ? (currentNoteIndex / generatedNotes.length) * 100
     : 0;
   const isComplete = currentNoteIndex >= generatedNotes.length;
+
+  // Log the round to history once it is complete.
+  useEffect(() => {
+    if (isComplete && generatedNotes.length > 0 && !recorded.current) {
+      recorded.current = true;
+      recordSession("score", score.correct, generatedNotes.length);
+    }
+  }, [isComplete, generatedNotes.length, score.correct]);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-4">
@@ -137,7 +146,7 @@ export const ScoreFlashcards = () => {
       </div>
 
       {/* Partition musicale */}
-      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-gradient-to-b from-white to-slate-50 p-4 shadow-[0_4px_12px_rgba(34,139,230,0.1)] dark:from-slate-900 dark:to-slate-950">
+      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-slate-50 p-4 dark:bg-slate-900">
         <MusicScore
           notes={generatedNotes.map((n) => n.note)}
           noteSpacing={70}
@@ -214,7 +223,7 @@ export const ScoreFlashcards = () => {
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5">
-          <div className="rounded-xl bg-gradient-to-br from-green-100 to-sky-100 p-8 text-center dark:from-green-950/50 dark:to-sky-950/50">
+          <div className="rounded-xl border border-green-500/30 bg-green-50 p-8 text-center dark:bg-green-950/40">
             <p className="mb-3 text-xl font-bold text-green-800 dark:text-green-300">
               ✅ Exercice terminé !
             </p>

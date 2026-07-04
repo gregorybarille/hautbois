@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { noteStep } from "../../music/notes";
+import { noteStep, parseNote } from "../../music/notes";
 
 interface MusicScoreProps {
   notes: string[];
@@ -47,11 +47,11 @@ export const MusicScore = ({
   const height = 160;
 
   // Colors based on mode
-  const staffColor = darkMode ? "#6b7280" : "#374151";
-  const baseNoteColor = darkMode ? "#e5e5e5" : "#1f2937";
+  const staffColor = darkMode ? "#64748b" : "#334155"; // slate-500 / slate-700
+  const baseNoteColor = darkMode ? "#e2e8f0" : "#1e293b"; // slate-200 / slate-800
   const activeColor = "#8B5CF6"; // violet
-  const bgColor = darkMode ? "#1a1a1a" : "#f9fafb";
-  const borderColor = darkMode ? "#374151" : "#e5e7eb";
+  const bgColor = darkMode ? "#0f172a" : "#f8fafc"; // slate-900 / slate-50
+  const borderColor = darkMode ? "#334155" : "#e2e8f0"; // slate-700 / slate-200
 
   // Helper to draw staff lines
   const renderStaffLines = () => {
@@ -80,7 +80,6 @@ export const MusicScore = ({
         width: "100%",
         overflowX: "auto",
         borderRadius: "0.75rem",
-        boxShadow: "inset 0 2px 4px 0 rgba(0,0,0,0.06)",
         border: "1px solid",
         padding: "1rem",
         scrollBehavior: "smooth",
@@ -110,6 +109,7 @@ export const MusicScore = ({
         {notes.map((noteName, index) => {
           const step = noteStep(noteName);
           if (step === null) return null;
+          const accidental = parseNote(noteName)?.accidental ?? 0;
 
           const x = START_OFFSET + index * noteSpacing;
           // Calculate Y based on step relative to top line (F5)
@@ -176,6 +176,20 @@ export const MusicScore = ({
               )}
 
               {renderLedgerLines()}
+
+              {/* Accidental (♯/♭) to the left of the note head */}
+              {accidental !== 0 && (
+                <text
+                  x={x - 19}
+                  y={cy + 5}
+                  fontFamily="serif"
+                  fontSize="16"
+                  fill={currentNoteColor}
+                  textAnchor="middle"
+                >
+                  {accidental === 1 ? "♯" : "♭"}
+                </text>
+              )}
 
               {/* Note Head */}
               <ellipse

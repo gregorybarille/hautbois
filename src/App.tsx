@@ -10,6 +10,11 @@ import { Home } from "./features/home";
 import { ScoreFlashcards } from "./features/score-flashcards";
 import { NameFlashcards } from "./features/name-flashcards";
 import { FingeringHelper } from "./features/fingering-helper";
+import { Scales } from "./features/scales";
+import { EarTraining } from "./features/ear-training";
+import { RhythmTrainer } from "./features/rhythm";
+import { ProgressView } from "./features/progress";
+import { Review } from "./features/review";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -34,6 +39,19 @@ function App() {
       )}
       {view === "fingeringHelper" && (
         <FingeringHelper key={instrument.id} instrument={instrument} />
+      )}
+      {view === "scales" && <Scales instrument={instrument} />}
+      {view === "earTraining" && <EarTraining />}
+      {view === "rhythm" && <RhythmTrainer />}
+      {view === "progress" && (
+        <ProgressView instrument={instrument} onNavigate={setView} />
+      )}
+      {view === "review" && (
+        <Review
+          key={instrument.id}
+          instrument={instrument}
+          onNavigate={setView}
+        />
       )}
     </AppShell>
   );

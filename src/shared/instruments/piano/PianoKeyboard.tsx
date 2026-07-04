@@ -35,10 +35,10 @@ export const PianoKeyboard = ({
   className = "",
   darkMode = false,
 }: PianoKeyboardProps) => {
-  const whiteFill = darkMode ? "#e5e5e5" : "#FFFFFF";
-  const blackFill = darkMode ? "#0a0a0a" : "#1f2937";
-  const border = darkMode ? "#6b7280" : "#374151";
-  const textColor = darkMode ? "#e5e5e5" : "#4B5563";
+  const whiteFill = darkMode ? "#e2e8f0" : "#f8fafc"; // slate-200 / slate-50
+  const blackFill = darkMode ? "#020617" : "#1e293b"; // slate-950 / slate-800
+  const border = darkMode ? "#64748b" : "#334155"; // slate-500 / slate-700
+  const textColor = darkMode ? "#e2e8f0" : "#475569"; // slate-200 / slate-600
 
   const highlightOctave =
     highlightSemitone === null ? null : Math.floor(highlightSemitone / 12);
