@@ -6,6 +6,7 @@ import {
   HandMetal,
   ListMusic,
   Ear,
+  Drum,
   LucideIcon,
 } from "lucide-react";
 import {
@@ -29,7 +30,8 @@ export type View =
   | "nameFlashcards"
   | "fingeringHelper"
   | "scales"
-  | "earTraining";
+  | "earTraining"
+  | "rhythm";
 
 const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
   { view: "scoreFlashcards", icon: Music, labelKey: "nav.score" },
@@ -37,6 +39,7 @@ const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
   { view: "fingeringHelper", icon: HandMetal, labelKey: "nav.fingering" },
   { view: "scales", icon: ListMusic, labelKey: "nav.scales" },
   { view: "earTraining", icon: Ear, labelKey: "nav.ear" },
+  { view: "rhythm", icon: Drum, labelKey: "nav.rhythm" },
 ];
 
 interface AppShellProps {

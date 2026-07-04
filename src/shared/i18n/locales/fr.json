@@ -15,7 +15,8 @@
     "name": "Nom de notes",
     "fingering": "Doigtés",
     "scales": "Gammes",
-    "ear": "Oreille"
+    "ear": "Oreille",
+    "rhythm": "Rythme"
   },
   "menu": {
     "title": "Menu Principal",
@@ -39,6 +40,10 @@
     "earTraining": {
       "title": "Entraînement de l'oreille",
       "description": "Reconnaissez les intervalles à l'écoute"
+    },
+    "rhythm": {
+      "title": "Rythme",
+      "description": "Tapez le rythme en suivant le métronome"
     }
   },
   "ear": {
@@ -64,6 +69,25 @@
       "M7": "Septième majeure",
       "P8": "Octave"
     }
+  },
+  "rhythm": {
+    "instructions": "Écoutez le décompte, puis tapez le rythme affiché (barre d'espace ou zone tactile).",
+    "difficulty": "Difficulté",
+    "levels": {
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
+    },
+    "tempo": "Tempo",
+    "tapHere": "TAP",
+    "tapHint": "Lancez pour taper le rythme",
+    "start": "Démarrer",
+    "retry": "Réessayer",
+    "newPattern": "Nouveau motif",
+    "meanError": "Écart moyen",
+    "extra": "taps en trop",
+    "noAudioTitle": "Audio non disponible",
+    "noAudio": "Votre navigateur ne supporte pas la synthèse audio."
   },
   "scales": {
     "root": "Tonique",

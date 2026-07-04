@@ -60,6 +60,13 @@ export function playFrequency(frequency: number, duration = 0.6) {
   scheduleTone(audio, frequency, audio.currentTime, duration);
 }
 
+// Short metronome click; accented beats are higher/louder.
+export function playClick(accent = false) {
+  const audio = getContext();
+  if (!audio) return;
+  scheduleTone(audio, accent ? 1600 : 1100, audio.currentTime, 0.05);
+}
+
 // Play a sequence of frequencies at the given tempo (notes per second).
 // Returns the total duration in seconds.
 export function playSequence(

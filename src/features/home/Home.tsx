@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Music, FileText, HandMetal, ListMusic, Ear } from "lucide-react";
+import { Music, FileText, HandMetal, ListMusic, Ear, Drum } from "lucide-react";
 import { MenuCard, View } from "@/shared/components";
 
 interface HomeProps {
@@ -50,6 +50,12 @@ export const Home = ({ onNavigate }: HomeProps) => {
           description={t("menu.earTraining.description")}
           icon={Ear}
           onClick={() => onNavigate("earTraining")}
+        />
+        <MenuCard
+          title={t("menu.rhythm.title")}
+          description={t("menu.rhythm.description")}
+          icon={Drum}
+          onClick={() => onNavigate("rhythm")}
         />
       </div>
     </div>
