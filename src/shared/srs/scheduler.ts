@@ -142,6 +142,7 @@ export function orderByPriority(
     if (da !== db) return da ? -1 : 1;
     if (da) return ca.due - cb.due; // both due: soonest first
     return ca.box - cb.box; // neither due: weakest first
+  });
 }
 
 // Already-studied items that are due right now, ordered soonest-first.
