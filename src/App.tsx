@@ -13,6 +13,7 @@ import { FingeringHelper } from "./features/fingering-helper";
 import { Scales } from "./features/scales";
 import { EarTraining } from "./features/ear-training";
 import { RhythmTrainer } from "./features/rhythm";
+import { ProgressView } from "./features/progress";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -41,6 +42,7 @@ function App() {
       {view === "scales" && <Scales instrument={instrument} />}
       {view === "earTraining" && <EarTraining />}
       {view === "rhythm" && <RhythmTrainer />}
+      {view === "progress" && <ProgressView />}
     </AppShell>
   );
 }

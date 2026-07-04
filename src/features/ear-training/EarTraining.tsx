@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RotateCcw, ArrowRight, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   saveBoxes,
   weightedDraw,
 } from "@/shared/srs/leitner";
+import { recordSession } from "@/shared/progress/history";
 
 const SRS_KEY = "srs-ear-intervals";
 // Comfortable mid-range roots (semitones relative to middle Do, C4 = 0).
@@ -39,6 +40,8 @@ export const EarTraining = () => {
   const [question, setQuestion] = useState<Question | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
+  // Log history in rounds of 10 answered questions.
+  const round = useRef({ answered: 0, correct: 0 });
 
   const playQuestion = useCallback((q: Question) => {
     playSequence(
@@ -81,6 +84,13 @@ export const EarTraining = () => {
       SRS_KEY,
       recordResult(loadBoxes(SRS_KEY), String(question.semitones), correct),
     );
+
+    round.current.answered += 1;
+    if (correct) round.current.correct += 1;
+    if (round.current.answered >= 10) {
+      recordSession("ear", round.current.correct, round.current.answered);
+      round.current = { answered: 0, correct: 0 };
+    }
   };
 
   return (

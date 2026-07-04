@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { isAudioSupported, playClick } from "@/shared/audio/synth";
+import { recordSession } from "@/shared/progress/history";
 import {
   BEATS_PER_BAR,
   Difficulty,
@@ -106,6 +107,7 @@ export const RhythmTrainer = () => {
         meanErrorMs: hits ? Math.round(errorSum / hits) : 0,
         perOnset,
       });
+      recordSession("rhythm", hits, pattern.onsets.length);
     },
     [pattern],
   );

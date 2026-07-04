@@ -16,7 +16,10 @@
     "fingering": "Doigtés",
     "scales": "Gammes",
     "ear": "Oreille",
-    "rhythm": "Rythme"
+    "rhythm": "Rythme",
+    "progress": "Progrès",
+    "open": "Ouvrir le menu",
+    "close": "Fermer le menu"
   },
   "menu": {
     "title": "Menu Principal",
@@ -44,6 +47,10 @@
     "rhythm": {
       "title": "Rythme",
       "description": "Tapez le rythme en suivant le métronome"
+    },
+    "progress": {
+      "title": "Progression",
+      "description": "Suivez vos statistiques et vos points à travailler"
     }
   },
   "ear": {
@@ -88,6 +95,17 @@
     "extra": "taps en trop",
     "noAudioTitle": "Audio non disponible",
     "noAudio": "Votre navigateur ne supporte pas la synthèse audio."
+  },
+  "progress": {
+    "subtitle": "Votre pratique au fil du temps.",
+    "streak": "Série de jours",
+    "days": "j",
+    "todayGoal": "Sessions aujourd'hui",
+    "sessions": "sessions",
+    "noData": "Pas encore de données",
+    "emptyTitle": "Aucune session pour l'instant",
+    "empty": "Terminez un exercice pour voir vos statistiques apparaître ici.",
+    "focus": "À travailler en priorité"
   },
   "scales": {
     "root": "Tonique",

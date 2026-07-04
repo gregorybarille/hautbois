@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshCw, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   saveBoxes,
   weightedDraw,
 } from "../../shared/srs/leitner";
+import { recordSession } from "../../shared/progress/history";
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
 const NATURAL_NOTES: string[] = NOTE_BASES;
@@ -43,9 +44,12 @@ export const ScoreFlashcards = () => {
   const [generatedNotes, setGeneratedNotes] = useState<NoteResult[]>([]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
+  // Ensure each completed round is logged to history exactly once.
+  const recorded = useRef(false);
 
   // Générer 10 notes en privilégiant les notes les moins maîtrisées
   const generateNotes = useCallback(() => {
+    recorded.current = false;
     const drawn = weightedDraw(NATURAL_NOTES, loadBoxes(SRS_KEY), 10);
     setGeneratedNotes(drawn.map((note) => ({ note, status: "pending" })));
     setCurrentNoteIndex(0);
@@ -95,6 +99,14 @@ export const ScoreFlashcards = () => {
     ? (currentNoteIndex / generatedNotes.length) * 100
     : 0;
   const isComplete = currentNoteIndex >= generatedNotes.length;
+
+  // Log the round to history once it is complete.
+  useEffect(() => {
+    if (isComplete && generatedNotes.length > 0 && !recorded.current) {
+      recorded.current = true;
+      recordSession("score", score.correct, generatedNotes.length);
+    }
+  }, [isComplete, generatedNotes.length, score.correct]);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-4">
