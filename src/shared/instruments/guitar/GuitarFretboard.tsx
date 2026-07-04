@@ -27,9 +27,9 @@ const STRING_LABELS = ["Mi", "La", "Ré", "Sol", "Si", "Mi"]; // low → high
 
 // Exported as GuitarChordDiagram so the name reflects the new design
 export const GuitarChordDiagram = ({ chord, darkMode = false, className = "" }: Props) => {
-  const textColor = darkMode ? "#e5e5e5" : "#4B5563";
-  const lineColor = darkMode ? "#9ca3af" : "#374151";
-  const nutColor = darkMode ? "#e5e5e5" : "#1f2937";
+  const textColor = darkMode ? "#e2e8f0" : "#475569"; // slate-200 / slate-600
+  const lineColor = darkMode ? "#94a3b8" : "#334155"; // slate-400 / slate-700
+  const nutColor = darkMode ? "#e2e8f0" : "#1e293b"; // slate-200 / slate-800
 
   const pressedFrets = chord.strings.filter((f) => f > 0);
   const hasOpen = chord.strings.some((f) => f === 0);

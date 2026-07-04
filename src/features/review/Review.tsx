@@ -286,7 +286,7 @@ const NoteCard = ({
 }) => (
   <>
     <p className="text-muted-foreground">{t("review.nameNote")}</p>
-    <div className="rounded-2xl border-2 border-blue-500 bg-white p-4 dark:bg-slate-900">
+    <div className="rounded-2xl border-2 border-blue-500 bg-slate-50 p-4 dark:bg-slate-900">
       <MusicScore notes={[note]} noteSpacing={80} darkMode={darkMode} />
     </div>
     <ChoiceGrid
@@ -409,7 +409,7 @@ const ScaleReviewCard = ({
         </span>
         {revealed ? (
           <>
-            <div className="w-full rounded-2xl border-2 border-blue-500 bg-white p-4 dark:bg-slate-900">
+            <div className="w-full rounded-2xl border-2 border-blue-500 bg-slate-50 p-4 dark:bg-slate-900">
               <MusicScore
                 notes={scale.map((n) => n.name)}
                 noteSpacing={56}

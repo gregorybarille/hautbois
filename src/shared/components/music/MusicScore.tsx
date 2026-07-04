@@ -47,11 +47,11 @@ export const MusicScore = ({
   const height = 160;
 
   // Colors based on mode
-  const staffColor = darkMode ? "#6b7280" : "#374151";
-  const baseNoteColor = darkMode ? "#e5e5e5" : "#1f2937";
+  const staffColor = darkMode ? "#64748b" : "#334155"; // slate-500 / slate-700
+  const baseNoteColor = darkMode ? "#e2e8f0" : "#1e293b"; // slate-200 / slate-800
   const activeColor = "#8B5CF6"; // violet
-  const bgColor = darkMode ? "#1a1a1a" : "#f9fafb";
-  const borderColor = darkMode ? "#374151" : "#e5e7eb";
+  const bgColor = darkMode ? "#0f172a" : "#f8fafc"; // slate-900 / slate-50
+  const borderColor = darkMode ? "#334155" : "#e2e8f0"; // slate-700 / slate-200
 
   // Helper to draw staff lines
   const renderStaffLines = () => {

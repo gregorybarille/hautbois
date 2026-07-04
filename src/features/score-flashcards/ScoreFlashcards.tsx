@@ -146,7 +146,7 @@ export const ScoreFlashcards = () => {
       </div>
 
       {/* Partition musicale */}
-      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-white p-4 dark:bg-slate-900">
+      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-slate-50 p-4 dark:bg-slate-900">
         <MusicScore
           notes={generatedNotes.map((n) => n.note)}
           noteSpacing={70}
