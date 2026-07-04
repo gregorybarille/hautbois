@@ -1,6 +1,13 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Music, FileText, HandMetal, ListMusic, LucideIcon } from "lucide-react";
+import {
+  Music,
+  FileText,
+  HandMetal,
+  ListMusic,
+  Ear,
+  LucideIcon,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,13 +28,15 @@ export type View =
   | "scoreFlashcards"
   | "nameFlashcards"
   | "fingeringHelper"
-  | "scales";
+  | "scales"
+  | "earTraining";
 
 const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
   { view: "scoreFlashcards", icon: Music, labelKey: "nav.score" },
   { view: "nameFlashcards", icon: FileText, labelKey: "nav.name" },
   { view: "fingeringHelper", icon: HandMetal, labelKey: "nav.fingering" },
   { view: "scales", icon: ListMusic, labelKey: "nav.scales" },
+  { view: "earTraining", icon: Ear, labelKey: "nav.ear" },
 ];
 
 interface AppShellProps {
@@ -146,7 +155,12 @@ export const AppShell = ({
         </div>
 
         {/* Mobile bottom nav */}
-        <nav className="grid grid-cols-4 border-t border-border bg-card/40 md:hidden">
+        <nav
+          className="grid border-t border-border bg-card/40 md:hidden"
+          style={{
+            gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))`,
+          }}
+        >
           {NAV.map(({ view: v, icon: Icon, labelKey }) => {
             const active = v === view;
             return (
@@ -156,14 +170,14 @@ export const AppShell = ({
                 onClick={() => onViewChange(v)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors",
+                  "flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[0.7rem] font-medium transition-colors",
                   active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="size-5" />
-                {t(labelKey)}
+                <Icon className="size-5 shrink-0" />
+                <span className="max-w-full truncate">{t(labelKey)}</span>
               </button>
             );
           })}

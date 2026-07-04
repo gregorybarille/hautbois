@@ -68,6 +68,28 @@ export interface ScaleNote {
   semitone: number;
 }
 
+// --- Intervals (for ear training) ---
+export interface Interval {
+  semitones: number;
+  labelKey: string;
+}
+
+// One octave of intervals, ascending.
+export const INTERVALS: Interval[] = [
+  { semitones: 1, labelKey: "ear.intervals.m2" },
+  { semitones: 2, labelKey: "ear.intervals.M2" },
+  { semitones: 3, labelKey: "ear.intervals.m3" },
+  { semitones: 4, labelKey: "ear.intervals.M3" },
+  { semitones: 5, labelKey: "ear.intervals.P4" },
+  { semitones: 6, labelKey: "ear.intervals.TT" },
+  { semitones: 7, labelKey: "ear.intervals.P5" },
+  { semitones: 8, labelKey: "ear.intervals.m6" },
+  { semitones: 9, labelKey: "ear.intervals.M6" },
+  { semitones: 10, labelKey: "ear.intervals.m7" },
+  { semitones: 11, labelKey: "ear.intervals.M7" },
+  { semitones: 12, labelKey: "ear.intervals.P8" },
+];
+
 // Generate the ascending note sequence for a scale/arpeggio starting on the
 // middle-octave root. Notes stay within the app's playable range.
 export function generateScale(root: string, type: ScaleTypeId): ScaleNote[] {

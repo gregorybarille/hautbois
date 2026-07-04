@@ -14,7 +14,8 @@
     "score": "Partition",
     "name": "Nom de notes",
     "fingering": "Doigtés",
-    "scales": "Gammes"
+    "scales": "Gammes",
+    "ear": "Oreille"
   },
   "menu": {
     "title": "Menu Principal",
@@ -34,6 +35,34 @@
     "scales": {
       "title": "Gammes & Arpèges",
       "description": "Explorez les gammes et arpèges sur la portée et au doigté"
+    },
+    "earTraining": {
+      "title": "Entraînement de l'oreille",
+      "description": "Reconnaissez les intervalles à l'écoute"
+    }
+  },
+  "ear": {
+    "instructions": "Écoutez l'intervalle et identifiez-le.",
+    "replay": "Réécouter",
+    "correct": "Correct !",
+    "incorrect": "Raté",
+    "next": "Suivant",
+    "skip": "Passer",
+    "noAudioTitle": "Audio non disponible",
+    "noAudio": "Votre navigateur ne supporte pas la synthèse audio.",
+    "intervals": {
+      "m2": "Seconde mineure",
+      "M2": "Seconde majeure",
+      "m3": "Tierce mineure",
+      "M3": "Tierce majeure",
+      "P4": "Quarte juste",
+      "TT": "Triton",
+      "P5": "Quinte juste",
+      "m6": "Sixte mineure",
+      "M6": "Sixte majeure",
+      "m7": "Septième mineure",
+      "M7": "Septième majeure",
+      "P8": "Octave"
     }
   },
   "scales": {
