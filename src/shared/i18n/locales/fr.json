@@ -9,6 +9,12 @@
     "piano": "Piano",
     "guitar": "Guitare"
   },
+  "nav": {
+    "home": "Accueil",
+    "score": "Partition",
+    "name": "Nom de notes",
+    "fingering": "Doigtés"
+  },
   "menu": {
     "title": "Menu Principal",
     "instrumentPicker": "Instrument",
@@ -31,5 +37,9 @@
     "previous": "Précédent",
     "start": "Commencer",
     "finish": "Terminer"
+  },
+  "theme": {
+    "switchToDark": "Passer en mode sombre",
+    "switchToLight": "Passer en mode clair"
   }
 }

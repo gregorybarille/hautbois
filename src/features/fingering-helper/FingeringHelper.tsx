@@ -1,27 +1,19 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
-import {
-  Box,
-  Container,
-  Title,
-  Text,
-  Group,
-  ActionIcon,
-  Flex,
-} from "@mantine/core";
-import { Button, Card } from "../../shared/components";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/shared/theme/ThemeProvider";
+import { cn } from "@/lib/utils";
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { InstrumentConfig } from "../../shared/instruments";
 
 interface FingeringHelperProps {
-  onBack: () => void;
   instrument: InstrumentConfig;
 }
 
-export const FingeringHelper = ({ onBack, instrument }: FingeringHelperProps) => {
+export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
   const { t } = useTranslation();
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme } = useTheme();
+  const darkMode = theme === "dark";
   const NOTES = instrument.notes;
 
   // Filter for natural notes only (no sharp or flat symbols)
@@ -30,8 +22,10 @@ export const FingeringHelper = ({ onBack, instrument }: FingeringHelperProps) =>
     [NOTES],
   );
 
-  // Initialize with "Do" which is a safe middle note
-  const [selectedNote, setSelectedNote] = useState("Do");
+  // Initialize with the instrument's first available natural note
+  const [selectedNote, setSelectedNote] = useState(
+    () => naturalNotes[0] ?? NOTES[0],
+  );
 
   // Determine base note (without accidental) of the currently selected note
   const currentBaseNote = useMemo(
@@ -57,184 +51,96 @@ export const FingeringHelper = ({ onBack, instrument }: FingeringHelperProps) =>
     setSelectedNote(note);
   };
 
-  return (
-    <Box
-      style={{
-        minHeight: "100vh",
-        background: darkMode ? "#1a1a1a" : "#f5f5f5",
-        padding: "2rem",
-        transition: "background 0.3s ease",
-      }}
-    >
-      <Container size="xl">
-        <Group justify="space-between" mb="xl">
+  const isFlat = selectedNote.includes("♭");
+  const isSharp = selectedNote.includes("#");
+  const isWide = instrument.layout === "wide";
+
+  const toggleFlat = () => {
+    if (isFlat && variations.natural) setSelectedNote(variations.natural);
+    else if (variations.flat) setSelectedNote(variations.flat);
+  };
+
+  const toggleSharp = () => {
+    if (isSharp && variations.natural) setSelectedNote(variations.natural);
+    else if (variations.sharp) setSelectedNote(variations.sharp);
+  };
+
+  // Partition section: staff (fills available width) + accidental variations.
+  const partition = (
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col justify-center">
+        <MusicScore
+          notes={naturalNotes}
+          activeNote={currentBaseNote}
+          onNoteClick={handleScoreClick}
+          darkMode={darkMode}
+        />
+      </div>
+
+      <div className="mt-5 flex flex-col items-center">
+        <span className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+          Variations
+        </span>
+        <div className="flex gap-4">
           <Button
-            onClick={onBack}
-            variant="subtle"
-            leftSection={<ArrowLeft size={20} />}
-            style={{ color: darkMode ? "#ffffff" : undefined }}
+            type="button"
+            variant={isFlat ? "default" : "outline"}
+            disabled={!variations.flat}
+            onClick={toggleFlat}
+            className="size-14 rounded-full font-serif text-3xl"
           >
-            {t("common.back")}
+            ♭
           </Button>
-
-          <ActionIcon
-            onClick={() => setDarkMode(!darkMode)}
-            size="lg"
-            variant="subtle"
-            radius="xl"
-            style={{ color: darkMode ? "#ffffff" : "#000000" }}
+          <Button
+            type="button"
+            variant={isSharp ? "default" : "outline"}
+            disabled={!variations.sharp}
+            onClick={toggleSharp}
+            className="size-14 rounded-full font-serif text-3xl"
           >
-            {darkMode ? <Sun size={22} /> : <Moon size={22} />}
-          </ActionIcon>
-        </Group>
+            ♯
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
 
-        <Card
-          noPadding
-          style={{
-            background: darkMode ? "#2a2a2a" : "white",
-            transition: "background 0.3s ease",
-          }}
-        >
-          <Box p="xl">
-            <Title
-              order={2}
-              size="1.5rem"
-              mb="xl"
-              style={{ color: darkMode ? "#ffffff" : undefined }}
-            >
-              {t("menu.fingeringHelper.title")}
-            </Title>
+  // Instrument fingering chart, shown in a bordered panel.
+  const chartPanel = (
+    <aside
+      className={cn(
+        "flex min-h-0 flex-col items-center rounded-2xl border border-border bg-card/40 p-4",
+        isWide ? "w-full shrink-0" : "shrink-0 lg:w-72",
+      )}
+    >
+      <h3 className="mb-3 shrink-0 text-3xl font-semibold text-foreground">
+        {selectedNote}
+      </h3>
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+        <instrument.NoteChart
+          note={selectedNote}
+          height={isWide ? 200 : 650}
+          darkMode={darkMode}
+        />
+      </div>
+    </aside>
+  );
 
-            <Flex
-              gap="xl"
-              // Wide charts (piano, guitar) stack under the staff
-              direction={
-                instrument.layout === "wide"
-                  ? "column"
-                  : { base: "column", md: "row" }
-              }
-              align="center"
-              justify="space-between"
-            >
-              {/* Left side: Music score and variations */}
-              <Box
-                style={{
-                  flex: 1,
-                  maxWidth: 600,
-                  width: instrument.layout === "wide" ? "100%" : undefined,
-                }}
-              >
-                <MusicScore
-                  notes={naturalNotes}
-                  activeNote={currentBaseNote}
-                  onNoteClick={handleScoreClick}
-                  darkMode={darkMode}
-                />
+  return (
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+      <h2 className="mb-4 shrink-0 text-2xl font-semibold text-foreground">
+        {t("menu.fingeringHelper.title")}
+      </h2>
 
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    marginTop: "1.5rem",
-                  }}
-                >
-                  <Text
-                    size="sm"
-                    fw={600}
-                    tt="uppercase"
-                    c="dimmed"
-                    mb="sm"
-                    style={{
-                      letterSpacing: "0.05em",
-                      color: darkMode ? "#9ca3af" : undefined,
-                    }}
-                  >
-                    Variations
-                  </Text>
-                  <Group gap="md">
-                    <ActionIcon
-                      variant={
-                        selectedNote.includes("♭") ? "filled" : "default"
-                      }
-                      color={selectedNote.includes("♭") ? "blue" : "gray"}
-                      disabled={!variations.flat}
-                      size={64}
-                      radius="xl"
-                      onClick={() => {
-                        if (selectedNote.includes("♭") && variations.natural) {
-                          setSelectedNote(variations.natural);
-                        } else if (variations.flat) {
-                          setSelectedNote(variations.flat);
-                        }
-                      }}
-                      style={{
-                        fontSize: "2rem",
-                        fontFamily: "serif",
-                        border: !selectedNote.includes("♭")
-                          ? "2px solid var(--mantine-color-gray-3)"
-                          : "none",
-                      }}
-                    >
-                      ♭
-                    </ActionIcon>
-                    <ActionIcon
-                      variant={
-                        selectedNote.includes("#") ? "filled" : "default"
-                      }
-                      color={selectedNote.includes("#") ? "blue" : "gray"}
-                      disabled={!variations.sharp}
-                      size={64}
-                      radius="xl"
-                      onClick={() => {
-                        if (selectedNote.includes("#") && variations.natural) {
-                          setSelectedNote(variations.natural);
-                        } else if (variations.sharp) {
-                          setSelectedNote(variations.sharp);
-                        }
-                      }}
-                      style={{
-                        fontSize: "2rem",
-                        fontFamily: "serif",
-                        border: !selectedNote.includes("#")
-                          ? "2px solid var(--mantine-color-gray-3)"
-                          : "none",
-                      }}
-                    >
-                      ♯
-                    </ActionIcon>
-                  </Group>
-                </Box>
-              </Box>
-
-              {/* Right side: fingering chart for the selected instrument */}
-              <Box
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  minWidth: 300,
-                  width: instrument.layout === "wide" ? "100%" : undefined,
-                }}
-              >
-                <Title
-                  order={3}
-                  size="2rem"
-                  mb="md"
-                  style={{ color: darkMode ? "#ffffff" : undefined }}
-                >
-                  {selectedNote}
-                </Title>
-                <instrument.NoteChart
-                  note={selectedNote}
-                  height={instrument.layout === "wide" ? 220 : 650}
-                  darkMode={darkMode}
-                />
-              </Box>
-            </Flex>
-          </Box>
-        </Card>
-      </Container>
-    </Box>
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 gap-6",
+          isWide ? "flex-col" : "flex-col lg:flex-row lg:items-stretch",
+        )}
+      >
+        {partition}
+        {chartPanel}
+      </div>
+    </div>
   );
 };

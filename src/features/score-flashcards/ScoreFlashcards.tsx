@@ -1,35 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, RefreshCw, Mic, MicOff } from "lucide-react";
+import { RefreshCw, Mic, MicOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
-  Box,
-  Container,
-  Title,
-  Text,
-  Progress,
-  Badge,
-  Stack,
-  Group,
-  Paper,
-  SimpleGrid,
-  Alert,
-  ActionIcon,
   Tooltip,
-} from "@mantine/core";
-import { Button, Card } from "../../shared/components";
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { NOTE_BASES } from "../../shared/music/notes";
 import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
-
-interface ScoreFlashcardsProps {
-  onBack: () => void;
-}
-
-interface NoteResult {
-  note: string;
-  status: "pending" | "correct" | "incorrect";
-  userAnswer?: string;
-}
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
 const NATURAL_NOTES: string[] = NOTE_BASES;
@@ -40,7 +23,13 @@ const STATUS_COLORS = {
   incorrect: "#ef4444",
 };
 
-export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
+interface NoteResult {
+  note: string;
+  status: "pending" | "correct" | "incorrect";
+  userAnswer?: string;
+}
+
+export const ScoreFlashcards = () => {
   const { t } = useTranslation();
   const [generatedNotes, setGeneratedNotes] = useState<NoteResult[]>([]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
@@ -104,205 +93,146 @@ export const ScoreFlashcards = ({ onBack }: ScoreFlashcardsProps) => {
   const isComplete = currentNoteIndex >= generatedNotes.length;
 
   return (
-    <Box
-      style={{
-        minHeight: "100vh",
-        background: "#f5f5f5",
-        padding: "2rem",
-      }}
-    >
-      <Container size="lg">
-        <Button
-          onClick={onBack}
-          variant="subtle"
-          leftSection={<ArrowLeft size={20} />}
-          mb="xl"
-        >
-          {t("common.back")}
-        </Button>
+    <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-4">
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">
+          {t("menu.scoreFlashcards.title")}
+        </h2>
+        <p className="text-muted-foreground">
+          Dictez ou cliquez sur la note correspondante
+        </p>
+      </div>
 
-        <Card>
-          <Title order={2} size="2rem" mb="md">
-            {t("menu.scoreFlashcards.title")}
-          </Title>
-          <Text size="lg" mb="xl" c="dimmed">
-            Dictez ou cliquez sur la note correspondante
-          </Text>
+      {!voice.supported && (
+        <Alert className="text-amber-600 dark:text-amber-400">
+          <AlertTitle>Dictée vocale non disponible</AlertTitle>
+          <AlertDescription>
+            Votre navigateur ne supporte pas la reconnaissance vocale. Utilisez
+            les boutons pour répondre.
+          </AlertDescription>
+        </Alert>
+      )}
 
-          {!voice.supported && (
-            <Alert color="orange" title="Dictée vocale non disponible" mb="md">
-              Votre navigateur ne supporte pas la reconnaissance vocale.
-              Utilisez les boutons pour répondre.
-            </Alert>
-          )}
+      {voice.error && (
+        <Alert variant="destructive">
+          <AlertTitle>Erreur de dictée vocale</AlertTitle>
+          <AlertDescription>
+            {voice.error}. Utilisez les boutons pour répondre.
+          </AlertDescription>
+        </Alert>
+      )}
 
-          {voice.error && (
-            <Alert color="red" title="Erreur de dictée vocale" mb="md">
-              {voice.error}. Utilisez les boutons pour répondre.
-            </Alert>
-          )}
+      {/* Progression */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-foreground">
+            Progression : {currentNoteIndex} / {generatedNotes.length}
+          </span>
+          <div className="flex gap-2">
+            <Badge className="bg-green-600 text-white">✓ {score.correct}</Badge>
+            <Badge variant="destructive">✗ {score.incorrect}</Badge>
+          </div>
+        </div>
+        <Progress value={progress} className="h-2.5" />
+      </div>
 
-          {/* Progression */}
-          <Stack gap="md" mb="xl">
-            <Group justify="space-between">
-              <Text size="sm" fw={500}>
-                Progression : {currentNoteIndex} / {generatedNotes.length}
-              </Text>
-              <Group gap="md">
-                <Badge color="green" size="lg">
-                  ✓ {score.correct}
-                </Badge>
-                <Badge color="red" size="lg">
-                  ✗ {score.incorrect}
-                </Badge>
-              </Group>
-            </Group>
-            <Progress value={progress} size="lg" radius="xl" />
-          </Stack>
+      {/* Partition musicale */}
+      <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-gradient-to-b from-white to-slate-50 p-4 shadow-[0_4px_12px_rgba(34,139,230,0.1)] dark:from-slate-900 dark:to-slate-950">
+        <MusicScore
+          notes={generatedNotes.map((n) => n.note)}
+          noteSpacing={70}
+          noteColor={(_, index) => {
+            if (index === currentNoteIndex) return STATUS_COLORS.current;
+            const status = generatedNotes[index]?.status;
+            return status === "pending" ? undefined : STATUS_COLORS[status];
+          }}
+        />
+      </div>
 
-          {/* Partition musicale */}
-          <Paper
-            p="xl"
-            mb="xl"
-            style={{
-              background: "linear-gradient(to bottom, #ffffff, #f8f9fa)",
-              border: "3px solid #228be6",
-              borderRadius: "16px",
-              boxShadow: "0 4px 12px rgba(34, 139, 230, 0.1)",
-              maxWidth: "100%",
-              overflow: "hidden",
-            }}
-          >
-            <MusicScore
-              notes={generatedNotes.map((n) => n.note)}
-              noteSpacing={70}
-              noteColor={(_, index) => {
-                if (index === currentNoteIndex) return STATUS_COLORS.current;
-                const status = generatedNotes[index]?.status;
-                return status === "pending" ? undefined : STATUS_COLORS[status];
-              }}
-            />
-          </Paper>
-
-          {/* Sélection de notes */}
-          {!isComplete ? (
-            <Stack gap="lg">
-              {/* Bouton micro */}
-              <Group justify="center">
-                <Tooltip
-                  label={
-                    !voice.supported
-                      ? "Dictée vocale non disponible sur ce navigateur"
-                      : voice.listening
-                        ? "Arrêter la dictée"
-                        : "Activer la dictée vocale"
+      {/* Sélection de notes */}
+      {!isComplete ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={voice.toggle}
+                  size="icon-lg"
+                  disabled={!voice.supported}
+                  variant={voice.listening ? "default" : "secondary"}
+                  className={
+                    voice.listening
+                      ? "size-13 rounded-full bg-red-600 text-white hover:bg-red-600/90"
+                      : "size-13 rounded-full text-blue-600 dark:text-blue-400"
                   }
                 >
-                  <ActionIcon
-                    onClick={voice.toggle}
-                    size="xl"
-                    radius="xl"
-                    variant={voice.listening ? "filled" : "light"}
-                    color={voice.listening ? "red" : "blue"}
-                    disabled={!voice.supported}
-                    style={{
-                      width: 60,
-                      height: 60,
-                    }}
-                  >
-                    {voice.listening ? <MicOff size={28} /> : <Mic size={28} />}
-                  </ActionIcon>
-                </Tooltip>
-              </Group>
-
-              {/* Transcript */}
-              {voice.transcript && (
-                <Paper
-                  p="md"
-                  bg="blue.0"
-                  style={{
-                    borderRadius: "8px",
-                    border: "2px solid #228be6",
-                    textAlign: "center",
-                  }}
-                >
-                  <Text size="sm" c="dimmed" mb="xs">
-                    🎤 Vous dites :
-                  </Text>
-                  <Text size="lg" fw={500} c="blue.7">
-                    {voice.transcript}
-                  </Text>
-                </Paper>
-              )}
-
-              <Text size="lg" fw={500} ta="center" c="blue.7">
-                Ou cliquez sur la note :
-              </Text>
-
-              <SimpleGrid cols={{ base: 3, sm: 4, md: 7 }} spacing="md">
-                {NATURAL_NOTES.map((note) => (
-                  <Button
-                    key={note}
-                    onClick={() => checkAnswer(note)}
-                    size="xl"
-                    variant="light"
-                    color="blue"
-                    style={{
-                      height: "80px",
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {note}
-                  </Button>
-                ))}
-              </SimpleGrid>
-
-              {/* Bouton refresh */}
-              <Group justify="center" mt="md">
-                <Button
-                  onClick={generateNotes}
-                  variant="outline"
-                  leftSection={<RefreshCw size={20} />}
-                >
-                  Générer de nouvelles notes
+                  {voice.listening ? (
+                    <MicOff className="size-6" />
+                  ) : (
+                    <Mic className="size-6" />
+                  )}
                 </Button>
-              </Group>
-            </Stack>
-          ) : (
-            <Stack gap="lg" align="center">
-              <Paper
-                p="xl"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #d0f4de 0%, #a9def9 100%)",
-                  borderRadius: "12px",
-                  textAlign: "center",
-                }}
-              >
-                <Text size="xl" fw={700} mb="md" c="green.8">
-                  ✅ Exercice terminé !
-                </Text>
-                <Text size="lg" mb="md" fw={500}>
-                  Score final : {score.correct} / {generatedNotes.length}
-                </Text>
-                <Text size="md" c="dimmed">
-                  Taux de réussite :{" "}
-                  {Math.round((score.correct / generatedNotes.length) * 100)}%
-                </Text>
-              </Paper>
+              </TooltipTrigger>
+              <TooltipContent>
+                {voice.listening
+                  ? "Arrêter la dictée"
+                  : "Activer la dictée vocale"}
+              </TooltipContent>
+            </Tooltip>
 
+            {voice.transcript && (
+              <div className="rounded-lg border-2 border-blue-500 bg-blue-50 px-4 py-2 text-center dark:bg-blue-950/40">
+                <span className="text-sm text-muted-foreground">
+                  🎤 Vous dites :{" "}
+                </span>
+                <span className="text-base font-medium text-blue-700 dark:text-blue-300">
+                  {voice.transcript}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-7">
+            {NATURAL_NOTES.map((note) => (
               <Button
-                onClick={generateNotes}
-                size="lg"
-                leftSection={<RefreshCw size={24} />}
+                key={note}
+                onClick={() => checkAnswer(note)}
+                variant="secondary"
+                className="h-16 text-xl font-bold text-blue-700 dark:text-blue-300"
               >
-                Nouvelle série
+                {note}
               </Button>
-            </Stack>
-          )}
-        </Card>
-      </Container>
-    </Box>
+            ))}
+          </div>
+
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={generateNotes}>
+              <RefreshCw className="size-5" />
+              Générer de nouvelles notes
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-5">
+          <div className="rounded-xl bg-gradient-to-br from-green-100 to-sky-100 p-8 text-center dark:from-green-950/50 dark:to-sky-950/50">
+            <p className="mb-3 text-xl font-bold text-green-800 dark:text-green-300">
+              ✅ Exercice terminé !
+            </p>
+            <p className="mb-3 text-lg font-medium text-foreground">
+              Score final : {score.correct} / {generatedNotes.length}
+            </p>
+            <p className="text-muted-foreground">
+              Taux de réussite :{" "}
+              {Math.round((score.correct / generatedNotes.length) * 100)}%
+            </p>
+          </div>
+
+          <Button size="lg" onClick={generateNotes}>
+            <RefreshCw className="size-6" />
+            Nouvelle série
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
