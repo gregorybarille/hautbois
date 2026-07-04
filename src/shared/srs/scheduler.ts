@@ -137,12 +137,11 @@ export function orderByPriority(
   return shuffle(items).sort((a, b) => {
     const ca = getCard(deck, a);
     const cb = getCard(deck, b);
-    const da = isDue(ca, now);
-    const db = isDue(cb, now);
+    const da = ca.reps > 0 && isDue(ca, now);
+    const db = cb.reps > 0 && isDue(cb, now);
     if (da !== db) return da ? -1 : 1;
     if (da) return ca.due - cb.due; // both due: soonest first
     return ca.box - cb.box; // neither due: weakest first
-  });
 }
 
 // Already-studied items that are due right now, ordered soonest-first.
