@@ -40,10 +40,12 @@ export function recordSession(
   }
 }
 
-// Local YYYY-MM-DD key for grouping sessions by day.
 function dayKey(ts: number): string {
   const d = new Date(ts);
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export function sessionsToday(history: Session[]): number {
