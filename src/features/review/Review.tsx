@@ -1,22 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Volume2, Eye, Check, X, ArrowRight } from "lucide-react";
+import { Volume2, Eye, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { MusicScore } from "@/shared/components/music/MusicScore";
+import { ChoiceGrid, FeedbackRow, TFn } from "@/shared/components/quiz";
 import { useTheme } from "@/shared/theme/ThemeProvider";
 import { NOTE_BASES } from "@/shared/music/notes";
 import {
   INTERVALS,
+  INTERVAL_IDS,
   SCALE_TYPES_BY_ID,
-  ScaleTypeId,
   generateScale,
+  randomIntervalRoot,
   semitoneToFrequency,
 } from "@/shared/music/theory";
-import { isAudioSupported, playSequence } from "@/shared/audio/synth";
-import { dueItems, loadDeck, review } from "@/shared/srs/scheduler";
-import { DECK } from "@/shared/srs/decks";
+import {
+  isAudioSupported,
+  playInterval,
+  playSequence,
+} from "@/shared/audio/synth";
+import {
+  Deck,
+  dueItems,
+  loadDeck,
+  newItems,
+  review,
+  shuffle,
+} from "@/shared/srs/scheduler";
+import { DECK, parseScaleCardId } from "@/shared/srs/decks";
+import { recordSession } from "@/shared/progress/history";
 import { InstrumentConfig } from "@/shared/instruments";
 import { View } from "@/shared/components";
 
@@ -26,6 +39,8 @@ interface ReviewCard {
   type: CardType;
   deck: string;
   id: string;
+  // Root semitone for interval cards, drawn when the queue is built.
+  root?: number;
 }
 
 interface ReviewProps {
@@ -34,17 +49,6 @@ interface ReviewProps {
 }
 
 const SESSION_MAX = 20;
-const INTERVAL_ROOT_MIN = -9;
-const INTERVAL_ROOT_MAX = 4;
-
-const shuffle = <T,>(arr: T[]): T[] => {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
 
 export const Review = ({ instrument, onNavigate }: ReviewProps) => {
   const { t } = useTranslation();
@@ -52,33 +56,50 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
   const darkMode = theme === "dark";
   const audioOk = isAudioSupported();
 
-  // Build the session queue once, from everything currently due.
+  // Build the session queue once: everything currently due, topped up with
+  // new (never-studied) cards when there is room left. Each deck is loaded
+  // from localStorage once and reused for both the due and new lookups.
   const queue = useMemo<ReviewCard[]>(() => {
-    const notes = dueItems(DECK.notes, NOTE_BASES).map((id) => ({
-      type: "note" as const,
-      deck: DECK.notes,
+    const scalesDeck = loadDeck(DECK.scales);
+    const scaleIds = Object.keys(scalesDeck).filter(
+      (id) => parseScaleCardId(id) !== null,
+    );
+    const fingeringsKey = DECK.fingerings(instrument.id);
+    const sources: { type: CardType; key: string; ids: string[]; deck: Deck }[] =
+      [
+        { type: "note", key: DECK.notes, ids: NOTE_BASES, deck: loadDeck(DECK.notes) },
+        {
+          type: "interval",
+          key: DECK.intervals,
+          ids: INTERVAL_IDS,
+          deck: loadDeck(DECK.intervals),
+        },
+        {
+          type: "fingering",
+          key: fingeringsKey,
+          ids: instrument.notes,
+          deck: loadDeck(fingeringsKey),
+        },
+        { type: "scale", key: DECK.scales, ids: scaleIds, deck: scalesDeck },
+      ];
+    const toCard = (type: CardType, key: string, id: string): ReviewCard => ({
+      type,
+      deck: key,
       id,
-    }));
-    const intervals = dueItems(
-      DECK.intervals,
-      INTERVALS.map((i) => String(i.semitones)),
-    ).map((id) => ({ type: "interval" as const, deck: DECK.intervals, id }));
-    const fingerings = dueItems(
-      DECK.fingerings(instrument.id),
-      instrument.notes,
-    ).map((id) => ({
-      type: "fingering" as const,
-      deck: DECK.fingerings(instrument.id),
-      id,
-    }));
-    const scales = dueItems(DECK.scales, Object.keys(loadDeck(DECK.scales))).map(
-      (id) => ({ type: "scale" as const, deck: DECK.scales, id }),
+      root: type === "interval" ? randomIntervalRoot() : undefined,
+    });
+
+    const due = sources.flatMap((s) =>
+      dueItems(s.deck, s.ids).map((id) => toCard(s.type, s.key, id)),
+    );
+    const fresh = sources.flatMap((s) =>
+      newItems(s.deck, s.ids).map((id) => toCard(s.type, s.key, id)),
     );
 
-    return shuffle([...notes, ...intervals, ...fingerings, ...scales]).slice(
-      0,
-      SESSION_MAX,
-    );
+    return shuffle([
+      ...shuffle(due).slice(0, SESSION_MAX),
+      ...shuffle(fresh).slice(0, Math.max(0, SESSION_MAX - due.length)),
+    ]);
   }, [instrument]);
 
   const [idx, setIdx] = useState(0);
@@ -88,27 +109,44 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
     chosen: string;
     correct: boolean;
   } | null>(null);
-  const [intervalRoot, setIntervalRoot] = useState(0);
 
   const cardsTotal = queue.length;
   const done = idx >= cardsTotal;
   const card = done ? null : queue[idx];
 
-  // Reset per-card state and auto-play the interval when a card appears.
+  // Auto-play the first card if it is an interval (the user just navigated
+  // here, so a gesture already unlocked audio). Later cards play in advance().
+  const playedFirst = useRef(false);
   useEffect(() => {
-    if (!card) return;
+    if (playedFirst.current) return;
+    playedFirst.current = true;
+    const first = queue[0];
+    if (first?.type === "interval" && first.root !== undefined) {
+      playInterval(first.root, Number(first.id));
+    }
+  }, [queue]);
+
+  // Log the finished session to practice history exactly once.
+  const recorded = useRef(false);
+  useEffect(() => {
+    if (done && cardsTotal > 0 && !recorded.current) {
+      recorded.current = true;
+      recordSession("review", correctCount, cardsTotal);
+    }
+  }, [done, cardsTotal, correctCount]);
+
+  // Move to the next card, resetting per-card state in the same event so the
+  // new card never renders with the previous card's answer or reveal.
+  const advance = () => {
+    const nextIdx = idx + 1;
+    setIdx(nextIdx);
     setRevealed(false);
     setAnswer(null);
-    if (card.type === "interval") {
-      const root =
-        INTERVAL_ROOT_MIN +
-        Math.floor(Math.random() * (INTERVAL_ROOT_MAX - INTERVAL_ROOT_MIN + 1));
-      setIntervalRoot(root);
-      const size = Number(card.id);
-      playSequence([root, root + size].map(semitoneToFrequency), 2);
+    const nextCard = queue[nextIdx];
+    if (nextCard?.type === "interval" && nextCard.root !== undefined) {
+      playInterval(nextCard.root, Number(nextCard.id));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, cardsTotal]);
+  };
 
   const grade = (correct: boolean) => {
     if (!card) return;
@@ -125,10 +163,8 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
 
   const answerSelf = (known: boolean) => {
     grade(known);
-    setIdx((i) => i + 1);
+    advance();
   };
-
-  const next = () => setIdx((i) => i + 1);
 
   if (cardsTotal === 0) {
     return (
@@ -183,7 +219,7 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
           note={card.id}
           answer={answer}
           onAnswer={answerAuto}
-          onNext={next}
+          onNext={advance}
           darkMode={darkMode}
           t={t}
         />
@@ -194,16 +230,9 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
           size={Number(card.id)}
           answer={answer}
           audioOk={audioOk}
-          onReplay={() =>
-            playSequence(
-              [intervalRoot, intervalRoot + Number(card.id)].map(
-                semitoneToFrequency,
-              ),
-              2,
-            )
-          }
+          onReplay={() => playInterval(card.root ?? 0, Number(card.id))}
           onAnswer={answerAuto}
-          onNext={next}
+          onNext={advance}
           t={t}
         />
       )}
@@ -239,8 +268,6 @@ export const Review = ({ instrument, onNavigate }: ReviewProps) => {
   );
 };
 
-type TFn = (key: string) => string;
-
 // --- Auto-graded: note on the staff ---
 const NoteCard = ({
   note,
@@ -264,6 +291,7 @@ const NoteCard = ({
     </div>
     <ChoiceGrid
       options={NOTE_BASES}
+      getId={(base) => base}
       correctId={note}
       answer={answer}
       onAnswer={onAnswer}
@@ -304,10 +332,9 @@ const IntervalCard = ({
       </Button>
     </div>
     <ChoiceGrid
-      options={INTERVALS.map((i) => String(i.semitones))}
-      labelFor={(id) =>
-        t(INTERVALS.find((i) => String(i.semitones) === id)!.labelKey)
-      }
+      options={INTERVALS}
+      getId={(interval) => String(interval.semitones)}
+      getLabel={(interval) => t(interval.labelKey)}
       correctId={String(size)}
       answer={answer}
       onAnswer={onAnswer}
@@ -367,9 +394,12 @@ const ScaleReviewCard = ({
   darkMode: boolean;
   t: TFn;
 }) => {
-  const [root, type] = id.split("|");
-  const scale = generateScale(root, type as ScaleTypeId);
-  const typeLabel = t(SCALE_TYPES_BY_ID[type as ScaleTypeId].labelKey);
+  // Queue building filters out unparseable ids, so this is just a type guard.
+  const parsed = parseScaleCardId(id);
+  if (!parsed) return null;
+  const { root, type } = parsed;
+  const scale = generateScale(root, type);
+  const typeLabel = t(SCALE_TYPES_BY_ID[type].labelKey);
   return (
     <>
       <p className="text-muted-foreground">{t("review.recallScale")}</p>
@@ -413,75 +443,6 @@ const ScaleReviewCard = ({
 };
 
 // --- Shared bits ---
-const ChoiceGrid = ({
-  options,
-  labelFor,
-  correctId,
-  answer,
-  onAnswer,
-}: {
-  options: string[];
-  labelFor?: (id: string) => string;
-  correctId: string;
-  answer: { chosen: string; correct: boolean } | null;
-  onAnswer: (id: string) => void;
-}) => (
-  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
-    {options.map((id) => {
-      const isCorrect = answer && id === correctId;
-      const isWrong = answer && !answer.correct && id === answer.chosen;
-      return (
-        <Button
-          key={id}
-          variant="outline"
-          disabled={!!answer}
-          onClick={() => onAnswer(id)}
-          className={cn(
-            "h-14 font-semibold disabled:opacity-100",
-            isCorrect &&
-              "border-green-500 bg-green-500/15 text-green-700 dark:text-green-300",
-            isWrong &&
-              "border-red-500 bg-red-500/15 text-red-700 dark:text-red-300",
-          )}
-        >
-          {labelFor ? labelFor(id) : id}
-        </Button>
-      );
-    })}
-  </div>
-);
-
-const FeedbackRow = ({
-  answer,
-  onNext,
-  t,
-}: {
-  answer: { chosen: string; correct: boolean } | null;
-  onNext: () => void;
-  t: TFn;
-}) => (
-  <div className="flex min-h-12 items-center justify-center gap-3">
-    {answer && (
-      <>
-        <span
-          className={cn(
-            "text-lg font-semibold",
-            answer.correct
-              ? "text-green-600 dark:text-green-400"
-              : "text-red-600 dark:text-red-400",
-          )}
-        >
-          {answer.correct ? t("ear.correct") : t("ear.incorrect")}
-        </span>
-        <Button onClick={onNext}>
-          {t("ear.next")}
-          <ArrowRight className="size-4" />
-        </Button>
-      </>
-    )}
-  </div>
-);
-
 const SelfGradeRow = ({
   onGrade,
   t,

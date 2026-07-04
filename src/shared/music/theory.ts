@@ -2,7 +2,7 @@
 // Absolute semitone index is relative to middle Do (C4 = 0), matching
 // noteSemitone() in notes.ts. Available app range (staff + charts) is
 // roughly -12 (Do Grave) .. 23 (Si Aigu).
-import { CHROMATIC_NOTES } from "./notes";
+import { CHROMATIC_NOTES, NOTE_BASES, noteSemitone, parseNote } from "./notes";
 
 export type ScaleTypeId =
   | "major"
@@ -18,15 +18,21 @@ export interface ScaleType {
   labelKey: string;
   // Semitone offsets from the root, ascending (includes the octave).
   intervals: number[];
+  // Scale degree (letter offset from the root) of each interval, used for
+  // enharmonic spelling. Omitted for the chromatic scale, which has none.
+  degrees?: number[];
 }
 
+const DIATONIC_DEGREES = [0, 1, 2, 3, 4, 5, 6, 7];
+const ARPEGGIO_DEGREES = [0, 2, 4, 7];
+
 export const SCALE_TYPES: ScaleType[] = [
-  { id: "major", labelKey: "scales.types.major", intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
-  { id: "minor_natural", labelKey: "scales.types.minor_natural", intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
-  { id: "minor_harmonic", labelKey: "scales.types.minor_harmonic", intervals: [0, 2, 3, 5, 7, 8, 11, 12] },
-  { id: "minor_melodic", labelKey: "scales.types.minor_melodic", intervals: [0, 2, 3, 5, 7, 9, 11, 12] },
-  { id: "arp_major", labelKey: "scales.types.arp_major", intervals: [0, 4, 7, 12] },
-  { id: "arp_minor", labelKey: "scales.types.arp_minor", intervals: [0, 3, 7, 12] },
+  { id: "major", labelKey: "scales.types.major", intervals: [0, 2, 4, 5, 7, 9, 11, 12], degrees: DIATONIC_DEGREES },
+  { id: "minor_natural", labelKey: "scales.types.minor_natural", intervals: [0, 2, 3, 5, 7, 8, 10, 12], degrees: DIATONIC_DEGREES },
+  { id: "minor_harmonic", labelKey: "scales.types.minor_harmonic", intervals: [0, 2, 3, 5, 7, 8, 11, 12], degrees: DIATONIC_DEGREES },
+  { id: "minor_melodic", labelKey: "scales.types.minor_melodic", intervals: [0, 2, 3, 5, 7, 9, 11, 12], degrees: DIATONIC_DEGREES },
+  { id: "arp_major", labelKey: "scales.types.arp_major", intervals: [0, 4, 7, 12], degrees: ARPEGGIO_DEGREES },
+  { id: "arp_minor", labelKey: "scales.types.arp_minor", intervals: [0, 3, 7, 12], degrees: ARPEGGIO_DEGREES },
   { id: "chromatic", labelKey: "scales.types.chromatic", intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
 ];
 
@@ -56,13 +62,6 @@ export function semitoneToFrequency(semitone: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-// Semitone offset of a chromatic root (index in CHROMATIC_NOTES) is just its
-// index, since CHROMATIC_NOTES is ascending from Do.
-function rootSemitone(root: string): number {
-  const idx = CHROMATIC_NOTES.indexOf(root);
-  return idx < 0 ? 0 : idx;
-}
-
 export interface ScaleNote {
   name: string;
   semitone: number;
@@ -90,13 +89,51 @@ export const INTERVALS: Interval[] = [
   { semitones: 12, labelKey: "ear.intervals.P8" },
 ];
 
+// SRS card ids for the intervals deck, and the reverse lookup. Every feature
+// must go through these so the decks never fragment across id schemes.
+export const INTERVAL_IDS = INTERVALS.map((i) => String(i.semitones));
+export const INTERVAL_BY_ID: Record<string, Interval> = Object.fromEntries(
+  INTERVALS.map((i) => [String(i.semitones), i]),
+);
+
+// Comfortable mid-range roots for interval drills (La3 .. Mi4).
+export const INTERVAL_ROOT_MIN = -9;
+export const INTERVAL_ROOT_MAX = 4;
+
+export const randomIntervalRoot = (): number =>
+  INTERVAL_ROOT_MIN +
+  Math.floor(Math.random() * (INTERVAL_ROOT_MAX - INTERVAL_ROOT_MIN + 1));
+
+// Spell an absolute semitone as the given scale degree of `root`: the degree
+// fixes the letter, the accidental makes up the difference (Fa# majeure gets
+// La# and Mi#, not Si♭ and Fa). Falls back to the chromatic spelling when a
+// single accidental isn't enough (double sharps/flats).
+function spellDegree(root: string, degree: number, semitone: number): string {
+  const parsed = parseNote(root);
+  if (!parsed) return semitoneToName(semitone);
+  const letterIdx = NOTE_BASES.indexOf(parsed.base) + degree;
+  const letter = NOTE_BASES[letterIdx % 7];
+  const octave = Math.floor(letterIdx / 7);
+  const natural = (noteSemitone(letter) ?? 0) + 12 * octave;
+  const accidental = semitone - natural;
+  if (accidental < -1 || accidental > 1 || octave < -1 || octave > 1) {
+    return semitoneToName(semitone);
+  }
+  const acc = accidental === 1 ? "#" : accidental === -1 ? "♭" : "";
+  const suffix = octave === 1 ? " Aigu" : octave === -1 ? " Grave" : "";
+  return `${letter}${acc}${suffix}`;
+}
+
 // Generate the ascending note sequence for a scale/arpeggio starting on the
 // middle-octave root. Notes stay within the app's playable range.
 export function generateScale(root: string, type: ScaleTypeId): ScaleNote[] {
-  const base = rootSemitone(root);
-  const { intervals } = SCALE_TYPES_BY_ID[type];
-  return intervals.map((offset) => {
+  const base = noteSemitone(root) ?? 0;
+  const { intervals, degrees } = SCALE_TYPES_BY_ID[type];
+  return intervals.map((offset, i) => {
     const semitone = base + offset;
-    return { name: semitoneToName(semitone), semitone };
+    const name = degrees
+      ? spellDegree(root, degrees[i], semitone)
+      : semitoneToName(semitone);
+    return { name, semitone };
   });
 }

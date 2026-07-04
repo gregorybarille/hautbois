@@ -164,7 +164,7 @@ export const AppShell = ({
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground md:flex-row">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r border-border bg-card/40 p-4 md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col gap-6 overflow-y-auto border-r border-border bg-card/40 p-4 md:flex">
         {sidebar}
       </aside>
 
@@ -189,7 +189,7 @@ export const AppShell = ({
             className="absolute inset-0 bg-black/40"
             onClick={() => setNavOpen(false)}
           />
-          <aside className="animate-in slide-in-from-left absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col gap-6 border-r border-border bg-background p-4 duration-200">
+          <aside className="animate-in slide-in-from-left absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col gap-6 overflow-y-auto border-r border-border bg-background p-4 duration-200">
             <div className="flex justify-end">
               <Button
                 variant="ghost"

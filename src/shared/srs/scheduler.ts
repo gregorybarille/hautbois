@@ -1,7 +1,8 @@
 // Spaced-repetition scheduler with review due-dates. Each card has a "box"
 // (mastery level) and a "due" timestamp: the next time it should be reviewed.
-// Successful reviews push the due date further out; failures reset it. New
-// items (absent from the deck) are treated as due immediately.
+// Successful reviews push the due date further out; failures reset it. Items
+// never studied (absent from the deck) are "new": practice drills prioritize
+// them, but they are not counted as due reviews.
 
 export interface Card {
   box: number;
@@ -49,8 +50,27 @@ export function getCard(deck: Deck, id: string): Card {
   return deck[id] ?? { box: 0, due: 0, reps: 0, lapses: 0 };
 }
 
+// Read-only helpers below accept either a deck key (loaded internally) or an
+// already-loaded Deck, so callers that need several answers about the same
+// deck (e.g. due count + new count) can load it once and reuse it instead of
+// re-reading and re-parsing localStorage per call.
+function resolveDeck(keyOrDeck: string | Deck): Deck {
+  return typeof keyOrDeck === "string" ? loadDeck(keyOrDeck) : keyOrDeck;
+}
+
 export function isDue(card: Card, now = Date.now()): boolean {
   return card.due <= now;
+}
+
+// Fisher-Yates shuffle (copy). Exposed so features drawing cards from decks
+// can randomize order without re-implementing it.
+export function shuffle<T>(items: T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 // Record a review result for an item and persist the deck.
@@ -82,18 +102,39 @@ export function review(key: string, id: string, correct: boolean): Deck {
   return updated;
 }
 
-// Number of items currently due (unknown items count as due).
-export function dueCount(key: string, items: string[], now = Date.now()): number {
-  const deck = loadDeck(key);
-  return items.filter((id) => isDue(getCard(deck, id), now)).length;
+// Number of already-studied items currently due for review.
+export function dueCount(
+  keyOrDeck: string | Deck,
+  items: string[],
+  now = Date.now(),
+): number {
+  const deck = resolveDeck(keyOrDeck);
+  return items.filter((id) => {
+    const card = getCard(deck, id);
+    return card.reps > 0 && isDue(card, now);
+  }).length;
+}
+
+// Items never studied yet (new cards). Kept in the given order.
+export function newItems(keyOrDeck: string | Deck, items: string[]): string[] {
+  const deck = resolveDeck(keyOrDeck);
+  return items.filter((id) => getCard(deck, id).reps === 0);
+}
+
+export function newCount(keyOrDeck: string | Deck, items: string[]): number {
+  return newItems(keyOrDeck, items).length;
 }
 
 // Items ordered by review priority: due items first (soonest due first),
-// then the rest by ascending mastery.
-export function orderByPriority(key: string, items: string[]): string[] {
-  const deck = loadDeck(key);
+// then the rest by ascending mastery. Ties are randomized (via a pre-shuffle
+// feeding a stable sort) so practice rounds don't come out in list order.
+export function orderByPriority(
+  keyOrDeck: string | Deck,
+  items: string[],
+): string[] {
+  const deck = resolveDeck(keyOrDeck);
   const now = Date.now();
-  return [...items].sort((a, b) => {
+  return shuffle(items).sort((a, b) => {
     const ca = getCard(deck, a);
     const cb = getCard(deck, b);
     const da = isDue(ca, now);
@@ -104,12 +145,15 @@ export function orderByPriority(key: string, items: string[]): string[] {
   });
 }
 
-// Only the items that are due right now, ordered soonest-first.
-export function dueItems(key: string, items: string[]): string[] {
-  const deck = loadDeck(key);
+// Already-studied items that are due right now, ordered soonest-first.
+export function dueItems(keyOrDeck: string | Deck, items: string[]): string[] {
+  const deck = resolveDeck(keyOrDeck);
   const now = Date.now();
   return items
-    .filter((id) => isDue(getCard(deck, id), now))
+    .filter((id) => {
+      const card = getCard(deck, id);
+      return card.reps > 0 && isDue(card, now);
+    })
     .sort((a, b) => getCard(deck, a).due - getCard(deck, b).due);
 }
 
@@ -117,12 +161,12 @@ export function dueItems(key: string, items: string[]): string[] {
 // only when there are fewer distinct items than requested, never twice in a
 // row.
 export function selectPractice(
-  key: string,
+  keyOrDeck: string | Deck,
   items: string[],
   count: number,
 ): string[] {
   if (items.length === 0) return [];
-  const ordered = orderByPriority(key, items);
+  const ordered = orderByPriority(keyOrDeck, items);
   const result: string[] = [];
   let i = 0;
   let previous: string | null = null;
@@ -140,8 +184,8 @@ export function selectPractice(
 }
 
 // One weighted pick, biased toward due and weak items (for continuous drills).
-export function pickWeighted(key: string, items: string[]): string {
-  const deck = loadDeck(key);
+export function pickWeighted(keyOrDeck: string | Deck, items: string[]): string {
+  const deck = resolveDeck(keyOrDeck);
   const now = Date.now();
   const weights = items.map((id) => {
     const card = getCard(deck, id);
@@ -159,8 +203,8 @@ export function pickWeighted(key: string, items: string[]): string {
 
 // Weakest reviewed items (for the "focus" panel): lowest box, seen at least
 // once, most-lapsed first.
-export function weakItems(key: string, max: number): string[] {
-  const deck = loadDeck(key);
+export function weakItems(keyOrDeck: string | Deck, max: number): string[] {
+  const deck = resolveDeck(keyOrDeck);
   return Object.entries(deck)
     .filter(([, card]) => card.reps > 0 && card.box < 3)
     .sort((a, b) => a[1].box - b[1].box || b[1].lapses - a[1].lapses)

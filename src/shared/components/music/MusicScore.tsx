@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { noteStep } from "../../music/notes";
+import { noteStep, parseNote } from "../../music/notes";
 
 interface MusicScoreProps {
   notes: string[];
@@ -109,6 +109,7 @@ export const MusicScore = ({
         {notes.map((noteName, index) => {
           const step = noteStep(noteName);
           if (step === null) return null;
+          const accidental = parseNote(noteName)?.accidental ?? 0;
 
           const x = START_OFFSET + index * noteSpacing;
           // Calculate Y based on step relative to top line (F5)
@@ -175,6 +176,20 @@ export const MusicScore = ({
               )}
 
               {renderLedgerLines()}
+
+              {/* Accidental (♯/♭) to the left of the note head */}
+              {accidental !== 0 && (
+                <text
+                  x={x - 19}
+                  y={cy + 5}
+                  fontFamily="serif"
+                  fontSize="16"
+                  fill={currentNoteColor}
+                  textAnchor="middle"
+                >
+                  {accidental === 1 ? "♯" : "♭"}
+                </text>
+              )}
 
               {/* Note Head */}
               <ellipse

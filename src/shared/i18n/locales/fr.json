@@ -112,6 +112,7 @@
     "empty": "Terminez un exercice pour voir vos statistiques apparaître ici.",
     "focus": "À travailler en priorité",
     "dueCount": "{{count}} élément(s) à réviser",
+    "newCount": "{{count}} nouveau(x) élément(s) à découvrir",
     "allCaughtUp": "Tout est à jour 🎉",
     "reviewHint": "Révision espacée : les éléments dus reviennent au bon moment.",
     "review": "Réviser"

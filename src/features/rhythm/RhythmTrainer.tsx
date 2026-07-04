@@ -39,6 +39,10 @@ interface Result {
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const SUBSLOTS = 4; // sixteenth grid per beat
+// Taps are accepted slightly outside the recording bar, so an anticipated
+// downbeat or a late final off-beat still lands inside the scoring tolerance
+// (which is capped at 220 ms in evaluate()).
+const TAP_WINDOW_PAD_MS = 250;
 
 export const RhythmTrainer = () => {
   const { t } = useTranslation();
@@ -130,10 +134,15 @@ export const RhythmTrainer = () => {
       });
     }
 
+    // Open the tap window just before the recording bar, so anticipated
+    // first-beat taps aren't dropped.
+    after(Math.max(0, BEATS_PER_BAR * beatMs - TAP_WINDOW_PAD_MS), () => {
+      accepting.current = true;
+    });
+
     // Recording bar
     after(BEATS_PER_BAR * beatMs, () => {
       recordStart.current = performance.now();
-      accepting.current = true;
       setPhase("playing");
       setCountBeat(0);
     });
@@ -144,10 +153,11 @@ export const RhythmTrainer = () => {
       });
     }
 
-    // End
-    after(2 * BEATS_PER_BAR * beatMs, () => {
+    // End: clear the beat highlight at the bar boundary, but keep accepting
+    // taps for the padding window before scoring.
+    after(2 * BEATS_PER_BAR * beatMs, () => setActiveBeat(null));
+    after(2 * BEATS_PER_BAR * beatMs + TAP_WINDOW_PAD_MS, () => {
       accepting.current = false;
-      setActiveBeat(null);
       setPhase("done");
       evaluate(beatMs);
     });
@@ -159,9 +169,10 @@ export const RhythmTrainer = () => {
     setTapFlash((f) => f + 1);
   }, []);
 
-  // Spacebar taps while recording.
+  // Spacebar taps while recording (the count-in is included so taps in the
+  // pre-bar padding window register; tap() gates on accepting itself).
   useEffect(() => {
-    if (phase !== "playing") return;
+    if (phase !== "playing" && phase !== "countin") return;
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
@@ -172,12 +183,13 @@ export const RhythmTrainer = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [phase, tap]);
 
-  const newPattern = () => {
+  const newPattern = (d: Difficulty = difficulty) => {
     clearTimers();
+    accepting.current = false;
     setPhase("idle");
     setResult(null);
     setActiveBeat(null);
-    setPattern(generatePattern(difficulty));
+    setPattern(generatePattern(d));
   };
 
   const onsetStatus = (onset: number): "hit" | "miss" | null => {
@@ -218,10 +230,7 @@ export const RhythmTrainer = () => {
             onValueChange={(v) => {
               const d = v as Difficulty;
               setDifficulty(d);
-              clearTimers();
-              setPhase("idle");
-              setResult(null);
-              setPattern(generatePattern(d));
+              newPattern(d);
             }}
           >
             <SelectTrigger className="w-40" disabled={running}>
@@ -297,7 +306,7 @@ export const RhythmTrainer = () => {
           e.preventDefault();
           tap();
         }}
-        disabled={phase !== "playing"}
+        disabled={!running}
         className={cn(
           "flex h-40 select-none flex-col items-center justify-center rounded-2xl border-2 text-lg font-semibold transition-colors",
           phase === "playing"
@@ -344,7 +353,7 @@ export const RhythmTrainer = () => {
           <Play className="size-5" />
           {phase === "done" ? t("rhythm.retry") : t("rhythm.start")}
         </Button>
-        <Button variant="outline" onClick={newPattern} disabled={running}>
+        <Button variant="outline" onClick={() => newPattern()} disabled={running}>
           <RefreshCw className="size-5" />
           {t("rhythm.newPattern")}
         </Button>

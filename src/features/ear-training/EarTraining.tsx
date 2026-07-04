@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RotateCcw, ArrowRight, Volume2 } from "lucide-react";
+import { RotateCcw, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
-import { INTERVALS, semitoneToFrequency } from "@/shared/music/theory";
-import { isAudioSupported, playSequence } from "@/shared/audio/synth";
+import { ChoiceGrid, FeedbackRow } from "@/shared/components/quiz";
+import {
+  INTERVALS,
+  INTERVAL_IDS,
+  randomIntervalRoot,
+} from "@/shared/music/theory";
+import { isAudioSupported, playInterval } from "@/shared/audio/synth";
 import { pickWeighted, review } from "@/shared/srs/scheduler";
 import { DECK } from "@/shared/srs/decks";
 import { recordSession } from "@/shared/progress/history";
-
-// Comfortable mid-range roots (semitones relative to middle Do, C4 = 0).
-const ROOT_MIN = -9; // La3
-const ROOT_MAX = 4; // Mi4
 
 interface Question {
   semitones: number; // interval size
@@ -25,48 +25,45 @@ interface Answer {
   correct: boolean;
 }
 
-const randomRoot = () =>
-  ROOT_MIN + Math.floor(Math.random() * (ROOT_MAX - ROOT_MIN + 1));
+const makeQuestion = (): Question => ({
+  semitones: Number(pickWeighted(DECK.intervals, INTERVAL_IDS)),
+  root: randomIntervalRoot(),
+});
+
+const playQuestion = (q: Question) => playInterval(q.root, q.semitones);
 
 export const EarTraining = () => {
   const { t } = useTranslation();
   const audioOk = isAudioSupported();
 
-  const [question, setQuestion] = useState<Question | null>(null);
+  // The first question isn't auto-played (audio needs a user gesture).
+  const [question, setQuestion] = useState<Question>(makeQuestion);
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
   // Log history in rounds of 10 answered questions.
   const round = useRef({ answered: 0, correct: 0 });
 
-  const playQuestion = useCallback((q: Question) => {
-    playSequence(
-      [q.root, q.root + q.semitones].map(semitoneToFrequency),
-      2,
-    );
-  }, []);
+  // Flush a partial round to history when leaving the view, so short
+  // sessions still count toward the streak and daily goal.
+  useEffect(
+    () => () => {
+      if (round.current.answered > 0) {
+        recordSession("ear", round.current.correct, round.current.answered);
+        round.current = { answered: 0, correct: 0 };
+      }
+    },
+    [],
+  );
 
-  const nextQuestion = useCallback(() => {
-    const size = pickWeighted(
-      DECK.intervals,
-      INTERVALS.map((i) => String(i.semitones)),
-    );
-    const q: Question = { semitones: Number(size), root: randomRoot() };
+  const nextQuestion = () => {
+    const q = makeQuestion();
     setQuestion(q);
     setAnswer(null);
     playQuestion(q);
-  }, [playQuestion]);
-
-  useEffect(() => {
-    // Prepare a first question but don't auto-play (needs a user gesture).
-    const size = pickWeighted(
-      DECK.intervals,
-      INTERVALS.map((i) => String(i.semitones)),
-    );
-    setQuestion({ semitones: Number(size), root: randomRoot() });
-  }, []);
+  };
 
   const handleAnswer = (chosen: number) => {
-    if (!question || answer) return;
+    if (answer) return;
     const correct = chosen === question.semitones;
     setAnswer({ chosen, correct });
     setScore((prev) => ({
@@ -82,6 +79,10 @@ export const EarTraining = () => {
       round.current = { answered: 0, correct: 0 };
     }
   };
+
+  const choiceAnswer = answer
+    ? { chosen: String(answer.chosen), correct: answer.correct }
+    : null;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-2xl flex-col gap-5">
@@ -110,8 +111,8 @@ export const EarTraining = () => {
       <div className="flex justify-center">
         <Button
           size="lg"
-          onClick={() => question && playQuestion(question)}
-          disabled={!audioOk || !question}
+          onClick={() => playQuestion(question)}
+          disabled={!audioOk}
           className="h-16 rounded-full px-8 text-lg"
         >
           <Volume2 className="size-6" />
@@ -120,60 +121,28 @@ export const EarTraining = () => {
       </div>
 
       {/* Interval choices */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-        {INTERVALS.map((interval) => {
-          const isCorrect = answer && interval.semitones === question?.semitones;
-          const isWrongChoice =
-            answer &&
-            !answer.correct &&
-            interval.semitones === answer.chosen;
-          return (
-            <Button
-              key={interval.semitones}
-              variant="outline"
-              onClick={() => handleAnswer(interval.semitones)}
-              disabled={!!answer}
-              className={cn(
-                "h-14 text-base font-semibold disabled:opacity-100",
-                isCorrect &&
-                  "border-green-500 bg-green-500/15 text-green-700 dark:text-green-300",
-                isWrongChoice &&
-                  "border-red-500 bg-red-500/15 text-red-700 dark:text-red-300",
-              )}
-            >
-              {t(interval.labelKey)}
-            </Button>
-          );
-        })}
-      </div>
+      <ChoiceGrid
+        options={INTERVALS}
+        getId={(interval) => String(interval.semitones)}
+        getLabel={(interval) => t(interval.labelKey)}
+        correctId={String(question.semitones)}
+        answer={choiceAnswer}
+        onAnswer={(id) => handleAnswer(Number(id))}
+        className="grid-cols-2 sm:grid-cols-3"
+      />
 
       {/* Feedback + next */}
-      <div className="flex min-h-12 items-center justify-center gap-3">
-        {answer && (
-          <>
-            <span
-              className={cn(
-                "text-lg font-semibold",
-                answer.correct
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400",
-              )}
-            >
-              {answer.correct ? t("ear.correct") : t("ear.incorrect")}
-            </span>
-            <Button onClick={nextQuestion}>
-              {t("ear.next")}
-              <ArrowRight className="size-4" />
-            </Button>
-          </>
-        )}
-        {!answer && (
+      <FeedbackRow
+        answer={choiceAnswer}
+        onNext={nextQuestion}
+        t={t}
+        idle={
           <Button variant="ghost" onClick={nextQuestion} disabled={!audioOk}>
             <RotateCcw className="size-4" />
             {t("ear.skip")}
           </Button>
-        )}
-      </div>
+        }
+      />
     </div>
   );
 };

@@ -12,9 +12,15 @@ import {
   sessionsToday,
   statsFor,
 } from "@/shared/progress/history";
-import { dueCount, loadDeck, weakItems } from "@/shared/srs/scheduler";
+import {
+  Deck,
+  dueCount,
+  loadDeck,
+  newCount,
+  weakItems,
+} from "@/shared/srs/scheduler";
 import { DECK } from "@/shared/srs/decks";
-import { INTERVALS } from "@/shared/music/theory";
+import { INTERVAL_BY_ID, INTERVAL_IDS } from "@/shared/music/theory";
 import { NOTE_BASES } from "@/shared/music/notes";
 import { InstrumentConfig } from "@/shared/instruments";
 import { View } from "@/shared/components";
@@ -74,18 +80,20 @@ export const ProgressView = ({ instrument, onNavigate }: ProgressViewProps) => {
     { id: "rhythm", icon: Drum, labelKey: "nav.rhythm" },
   ];
 
-  // Items due for review across decks (for the current instrument).
-  const totalDue = useMemo(() => {
-    const scaleIds = Object.keys(loadDeck(DECK.scales));
-    return (
-      dueCount(DECK.notes, NOTE_BASES) +
-      dueCount(
-        DECK.intervals,
-        INTERVALS.map((i) => String(i.semitones)),
-      ) +
-      dueCount(DECK.fingerings(instrument.id), instrument.notes) +
-      dueCount(DECK.scales, scaleIds)
-    );
+  // Due reviews vs never-studied items across decks (current instrument).
+  // Each deck is loaded from localStorage once and reused for both counts.
+  const { totalDue, totalNew } = useMemo(() => {
+    const scalesDeck = loadDeck(DECK.scales);
+    const decks: [Deck, string[]][] = [
+      [loadDeck(DECK.notes), NOTE_BASES],
+      [loadDeck(DECK.intervals), INTERVAL_IDS],
+      [loadDeck(DECK.fingerings(instrument.id)), instrument.notes],
+      [scalesDeck, Object.keys(scalesDeck)],
+    ];
+    return {
+      totalDue: decks.reduce((n, [deck, ids]) => n + dueCount(deck, ids), 0),
+      totalNew: decks.reduce((n, [deck, ids]) => n + newCount(deck, ids), 0),
+    };
   }, [instrument]);
 
   // Weak items from SRS decks (lowest boxes first).
@@ -93,9 +101,9 @@ export const ProgressView = ({ instrument, onNavigate }: ProgressViewProps) => {
 
   const weakIntervals = useMemo(
     () =>
-      weakItems(DECK.intervals, 3).map((semi) => {
-        const interval = INTERVALS.find((i) => String(i.semitones) === semi);
-        return interval ? t(interval.labelKey) : semi;
+      weakItems(DECK.intervals, 3).map((id) => {
+        const interval = INTERVAL_BY_ID[id];
+        return interval ? t(interval.labelKey) : id;
       }),
     [t],
   );
@@ -120,13 +128,18 @@ export const ProgressView = ({ instrument, onNavigate }: ProgressViewProps) => {
           <p className="text-lg font-semibold text-foreground">
             {totalDue > 0
               ? t("progress.dueCount", { count: totalDue })
-              : t("progress.allCaughtUp")}
+              : totalNew > 0
+                ? t("progress.newCount", { count: totalNew })
+                : t("progress.allCaughtUp")}
           </p>
           <p className="text-sm text-muted-foreground">
             {t("progress.reviewHint")}
           </p>
         </div>
-        <Button onClick={() => onNavigate("review")} disabled={totalDue === 0}>
+        <Button
+          onClick={() => onNavigate("review")}
+          disabled={totalDue + totalNew === 0}
+        >
           {t("progress.review")}
         </Button>
       </Card>

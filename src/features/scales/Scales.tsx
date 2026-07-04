@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Play, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
 } from "@/shared/music/theory";
 import { isAudioSupported, playFrequency, playSequence } from "@/shared/audio/synth";
 import { review } from "@/shared/srs/scheduler";
-import { DECK } from "@/shared/srs/decks";
+import { DECK, scaleCardId } from "@/shared/srs/decks";
 import { InstrumentConfig } from "@/shared/instruments";
 
 interface ScalesProps {
@@ -39,14 +39,19 @@ export const Scales = ({ instrument }: ScalesProps) => {
   const [root, setRoot] = useState<string>("Do");
   const [type, setType] = useState<ScaleTypeId>("major");
   const [index, setIndex] = useState(0);
+  const [reviewed, setReviewed] = useState(false);
+
+  // Reset per-scale state in the same event as the selection, so no render
+  // ever sees a cursor pointing into the previous scale.
+  const selectScale = (nextRoot: string, nextType: ScaleTypeId) => {
+    setRoot(nextRoot);
+    setType(nextType);
+    setIndex(0);
+    setReviewed(false);
+  };
 
   const scale = useMemo(() => generateScale(root, type), [root, type]);
   const noteNames = useMemo(() => scale.map((n) => n.name), [scale]);
-
-  // Keep the cursor in range when the scale changes.
-  useEffect(() => {
-    setIndex(0);
-  }, [root, type]);
 
   const current = scale[index];
   const fingeringAvailable = instrument.notes.includes(current?.name ?? "");
@@ -66,10 +71,8 @@ export const Scales = ({ instrument }: ScalesProps) => {
     playFrequency(semitoneToFrequency(scale[clamped].semitone));
   };
 
-  const [reviewed, setReviewed] = useState(false);
-  useEffect(() => setReviewed(false), [root, type]);
   const markReviewed = (known: boolean) => {
-    review(DECK.scales, `${root}|${type}`, known);
+    review(DECK.scales, scaleCardId(root, type), known);
     setReviewed(true);
   };
 
@@ -85,7 +88,7 @@ export const Scales = ({ instrument }: ScalesProps) => {
           <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             {t("scales.root")}
           </span>
-          <Select value={root} onValueChange={setRoot}>
+          <Select value={root} onValueChange={(v) => selectScale(v, type)}>
             <SelectTrigger className="w-28">
               <SelectValue />
             </SelectTrigger>
@@ -103,7 +106,10 @@ export const Scales = ({ instrument }: ScalesProps) => {
           <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             {t("scales.type")}
           </span>
-          <Select value={type} onValueChange={(v) => setType(v as ScaleTypeId)}>
+          <Select
+            value={type}
+            onValueChange={(v) => selectScale(root, v as ScaleTypeId)}
+          >
             <SelectTrigger className="w-56">
               <SelectValue />
             </SelectTrigger>

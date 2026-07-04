@@ -2,7 +2,7 @@
 // stored as a session so we can chart accuracy over time, compute streaks,
 // and surface daily goals.
 
-export type ExerciseId = "score" | "ear" | "rhythm";
+export type ExerciseId = "score" | "ear" | "rhythm" | "review";
 
 export interface Session {
   exercise: ExerciseId;
@@ -52,21 +52,21 @@ export function sessionsToday(history: Session[]): number {
 }
 
 // Number of consecutive days (ending today or yesterday) with >=1 session.
+// Walks calendar days via Date#setDate rather than fixed 24h steps, so DST
+// transitions (23h/25h days) can't skip or double-count a day.
 export function currentStreak(history: Session[]): number {
   if (history.length === 0) return 0;
   const days = new Set(history.map((s) => dayKey(s.at)));
-  const oneDay = 24 * 60 * 60 * 1000;
 
-  const todayKey = dayKey(Date.now());
-  const yesterdayKey = dayKey(Date.now() - oneDay);
+  const cursor = new Date();
+  if (!days.has(dayKey(cursor.getTime()))) cursor.setDate(cursor.getDate() - 1);
   // Streak is only "live" if there was activity today or yesterday.
-  if (!days.has(todayKey) && !days.has(yesterdayKey)) return 0;
+  if (!days.has(dayKey(cursor.getTime()))) return 0;
 
   let streak = 0;
-  let cursor = days.has(todayKey) ? Date.now() : Date.now() - oneDay;
-  while (days.has(dayKey(cursor))) {
+  while (days.has(dayKey(cursor.getTime()))) {
     streak += 1;
-    cursor -= oneDay;
+    cursor.setDate(cursor.getDate() - 1);
   }
   return streak;
 }

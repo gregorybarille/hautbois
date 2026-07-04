@@ -1,6 +1,8 @@
 // Lightweight Web Audio synth for playing notes/sequences with a soft
 // envelope. A single shared AudioContext is created lazily on first use
 // (after a user gesture, per browser autoplay policies).
+import { semitoneToFrequency } from "@/shared/music/theory";
+
 let ctx: AudioContext | null = null;
 
 function getContext(): AudioContext | null {
@@ -82,4 +84,14 @@ export function playSequence(
     scheduleTone(audio, freq, start + i * step, noteDuration);
   });
   return frequencies.length * step;
+}
+
+// Play a melodic interval: two tones from an absolute root semitone (C4 = 0).
+// Single definition shared by the ear-training and review drills so they stay
+// acoustically identical.
+export function playInterval(rootSemitone: number, semitones: number): void {
+  playSequence(
+    [rootSemitone, rootSemitone + semitones].map(semitoneToFrequency),
+    2,
+  );
 }
