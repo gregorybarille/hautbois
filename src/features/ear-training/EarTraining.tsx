@@ -7,15 +7,10 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { INTERVALS, semitoneToFrequency } from "@/shared/music/theory";
 import { isAudioSupported, playSequence } from "@/shared/audio/synth";
-import {
-  loadBoxes,
-  recordResult,
-  saveBoxes,
-  weightedDraw,
-} from "@/shared/srs/leitner";
+import { pickWeighted, review } from "@/shared/srs/scheduler";
+import { DECK } from "@/shared/srs/decks";
 import { recordSession } from "@/shared/progress/history";
 
-const SRS_KEY = "srs-ear-intervals";
 // Comfortable mid-range roots (semitones relative to middle Do, C4 = 0).
 const ROOT_MIN = -9; // La3
 const ROOT_MAX = 4; // Mi4
@@ -51,10 +46,9 @@ export const EarTraining = () => {
   }, []);
 
   const nextQuestion = useCallback(() => {
-    const [size] = weightedDraw(
+    const size = pickWeighted(
+      DECK.intervals,
       INTERVALS.map((i) => String(i.semitones)),
-      loadBoxes(SRS_KEY),
-      1,
     );
     const q: Question = { semitones: Number(size), root: randomRoot() };
     setQuestion(q);
@@ -64,10 +58,9 @@ export const EarTraining = () => {
 
   useEffect(() => {
     // Prepare a first question but don't auto-play (needs a user gesture).
-    const [size] = weightedDraw(
+    const size = pickWeighted(
+      DECK.intervals,
       INTERVALS.map((i) => String(i.semitones)),
-      loadBoxes(SRS_KEY),
-      1,
     );
     setQuestion({ semitones: Number(size), root: randomRoot() });
   }, []);
@@ -80,10 +73,7 @@ export const EarTraining = () => {
       correct: prev.correct + (correct ? 1 : 0),
       incorrect: prev.incorrect + (correct ? 0 : 1),
     }));
-    saveBoxes(
-      SRS_KEY,
-      recordResult(loadBoxes(SRS_KEY), String(question.semitones), correct),
-    );
+    review(DECK.intervals, String(question.semitones), correct);
 
     round.current.answered += 1;
     if (correct) round.current.correct += 1;

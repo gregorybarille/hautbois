@@ -18,6 +18,7 @@
     "ear": "Oreille",
     "rhythm": "Rythme",
     "progress": "Progrès",
+    "review": "Révision",
     "open": "Ouvrir le menu",
     "close": "Fermer le menu"
   },
@@ -51,6 +52,10 @@
     "progress": {
       "title": "Progression",
       "description": "Suivez vos statistiques et vos points à travailler"
+    },
+    "review": {
+      "title": "Révision du jour",
+      "description": "Révisez ce qui est dû, tous exercices confondus"
     }
   },
   "ear": {
@@ -105,7 +110,26 @@
     "noData": "Pas encore de données",
     "emptyTitle": "Aucune session pour l'instant",
     "empty": "Terminez un exercice pour voir vos statistiques apparaître ici.",
-    "focus": "À travailler en priorité"
+    "focus": "À travailler en priorité",
+    "dueCount": "{{count}} élément(s) à réviser",
+    "allCaughtUp": "Tout est à jour 🎉",
+    "reviewHint": "Révision espacée : les éléments dus reviennent au bon moment.",
+    "review": "Réviser"
+  },
+  "review": {
+    "title": "Révision du jour",
+    "nameNote": "Quelle est cette note ?",
+    "identifyInterval": "Quel est cet intervalle ?",
+    "recallFingering": "Rappelez-vous le doigté, puis vérifiez.",
+    "recallScale": "Rappelez-vous la gamme, puis vérifiez.",
+    "reveal": "Révéler",
+    "know": "Su",
+    "dontKnow": "Pas su",
+    "finished": "Révision terminée !",
+    "toProgress": "Voir la progression",
+    "backHome": "Accueil",
+    "allDoneTitle": "Rien à réviser 🎉",
+    "allDone": "Revenez plus tard, ou entraînez-vous dans un exercice."
   },
   "scales": {
     "root": "Tonique",
@@ -115,6 +139,10 @@
     "prev": "Note précédente",
     "next": "Note suivante",
     "noFingering": "Doigté indisponible pour cette note sur cet instrument",
+    "review": "Réviser cette gamme :",
+    "reviewed": "Révisé ✓",
+    "know": "Su",
+    "dontKnow": "Pas su",
     "types": {
       "major": "Majeure",
       "minor_natural": "Mineure naturelle",

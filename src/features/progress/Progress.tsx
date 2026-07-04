@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Flame, CalendarCheck, Music, Ear, Drum } from "lucide-react";
+import { Flame, CalendarCheck, Music, Ear, Drum, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -11,10 +12,19 @@ import {
   sessionsToday,
   statsFor,
 } from "@/shared/progress/history";
-import { loadBoxes } from "@/shared/srs/leitner";
+import { dueCount, loadDeck, weakItems } from "@/shared/srs/scheduler";
+import { DECK } from "@/shared/srs/decks";
 import { INTERVALS } from "@/shared/music/theory";
+import { NOTE_BASES } from "@/shared/music/notes";
+import { InstrumentConfig } from "@/shared/instruments";
+import { View } from "@/shared/components";
 
 const DAILY_GOAL = 3;
+
+interface ProgressViewProps {
+  instrument: InstrumentConfig;
+  onNavigate: (view: View) => void;
+}
 
 // Tiny inline sparkline for a 0..100 accuracy series.
 const Sparkline = ({ values }: { values: number[] }) => {
@@ -51,7 +61,7 @@ const Sparkline = ({ values }: { values: number[] }) => {
   );
 };
 
-export const ProgressView = () => {
+export const ProgressView = ({ instrument, onNavigate }: ProgressViewProps) => {
   const { t } = useTranslation();
 
   const history = useMemo(() => loadHistory(), []);
@@ -64,27 +74,31 @@ export const ProgressView = () => {
     { id: "rhythm", icon: Drum, labelKey: "nav.rhythm" },
   ];
 
-  // Weak items from SRS boxes (lowest boxes first).
-  const weakNotes = useMemo(() => {
-    const boxes = loadBoxes("srs-score-notes");
-    return Object.entries(boxes)
-      .sort((a, b) => a[1] - b[1])
-      .slice(0, 3)
-      .filter(([, box]) => box < 3)
-      .map(([note]) => note);
-  }, []);
+  // Items due for review across decks (for the current instrument).
+  const totalDue = useMemo(() => {
+    const scaleIds = Object.keys(loadDeck(DECK.scales));
+    return (
+      dueCount(DECK.notes, NOTE_BASES) +
+      dueCount(
+        DECK.intervals,
+        INTERVALS.map((i) => String(i.semitones)),
+      ) +
+      dueCount(DECK.fingerings(instrument.id), instrument.notes) +
+      dueCount(DECK.scales, scaleIds)
+    );
+  }, [instrument]);
 
-  const weakIntervals = useMemo(() => {
-    const boxes = loadBoxes("srs-ear-intervals");
-    return Object.entries(boxes)
-      .sort((a, b) => a[1] - b[1])
-      .slice(0, 3)
-      .filter(([, box]) => box < 3)
-      .map(([semi]) => {
+  // Weak items from SRS decks (lowest boxes first).
+  const weakNotes = useMemo(() => weakItems(DECK.notes, 3), []);
+
+  const weakIntervals = useMemo(
+    () =>
+      weakItems(DECK.intervals, 3).map((semi) => {
         const interval = INTERVALS.find((i) => String(i.semitones) === semi);
         return interval ? t(interval.labelKey) : semi;
-      });
-  }, [t]);
+      }),
+    [t],
+  );
 
   const isEmpty = history.length === 0;
 
@@ -96,6 +110,26 @@ export const ProgressView = () => {
         </h2>
         <p className="text-muted-foreground">{t("progress.subtitle")}</p>
       </div>
+
+      {/* Review call-to-action */}
+      <Card className="flex-row items-center gap-4 p-5">
+        <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <RefreshCw className="size-6" />
+        </span>
+        <div className="flex-1">
+          <p className="text-lg font-semibold text-foreground">
+            {totalDue > 0
+              ? t("progress.dueCount", { count: totalDue })
+              : t("progress.allCaughtUp")}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t("progress.reviewHint")}
+          </p>
+        </div>
+        <Button onClick={() => onNavigate("review")} disabled={totalDue === 0}>
+          {t("progress.review")}
+        </Button>
+      </Card>
 
       {isEmpty ? (
         <Card className="items-center gap-2 p-10 text-center">

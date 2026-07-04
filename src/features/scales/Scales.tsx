@@ -20,6 +20,8 @@ import {
   semitoneToFrequency,
 } from "@/shared/music/theory";
 import { isAudioSupported, playFrequency, playSequence } from "@/shared/audio/synth";
+import { review } from "@/shared/srs/scheduler";
+import { DECK } from "@/shared/srs/decks";
 import { InstrumentConfig } from "@/shared/instruments";
 
 interface ScalesProps {
@@ -62,6 +64,13 @@ export const Scales = ({ instrument }: ScalesProps) => {
     const clamped = Math.max(0, Math.min(scale.length - 1, next));
     setIndex(clamped);
     playFrequency(semitoneToFrequency(scale[clamped].semitone));
+  };
+
+  const [reviewed, setReviewed] = useState(false);
+  useEffect(() => setReviewed(false), [root, type]);
+  const markReviewed = (known: boolean) => {
+    review(DECK.scales, `${root}|${type}`, known);
+    setReviewed(true);
   };
 
   return (
@@ -113,6 +122,29 @@ export const Scales = ({ instrument }: ScalesProps) => {
             <Play className="size-4" />
             {t("scales.play")}
           </Button>
+        )}
+      </div>
+
+      {/* Self-assessment for spaced repetition */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-sm text-muted-foreground">{t("scales.review")}</span>
+        {reviewed ? (
+          <span className="text-sm font-medium text-green-600 dark:text-green-400">
+            {t("scales.reviewed")}
+          </span>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => markReviewed(false)}
+            >
+              {t("scales.dontKnow")}
+            </Button>
+            <Button size="sm" onClick={() => markReviewed(true)}>
+              {t("scales.know")}
+            </Button>
+          </>
         )}
       </div>
 

@@ -13,19 +13,12 @@ import {
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { NOTE_BASES } from "../../shared/music/notes";
 import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
-import {
-  loadBoxes,
-  recordResult,
-  saveBoxes,
-  weightedDraw,
-} from "../../shared/srs/leitner";
+import { review, selectPractice } from "../../shared/srs/scheduler";
+import { DECK } from "../../shared/srs/decks";
 import { recordSession } from "../../shared/progress/history";
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
 const NATURAL_NOTES: string[] = NOTE_BASES;
-
-// Spaced-repetition store key for score-reading practice.
-const SRS_KEY = "srs-score-notes";
 
 const STATUS_COLORS = {
   current: "#3b82f6",
@@ -50,7 +43,7 @@ export const ScoreFlashcards = () => {
   // Générer 10 notes en privilégiant les notes les moins maîtrisées
   const generateNotes = useCallback(() => {
     recorded.current = false;
-    const drawn = weightedDraw(NATURAL_NOTES, loadBoxes(SRS_KEY), 10);
+    const drawn = selectPractice(DECK.notes, NATURAL_NOTES, 10);
     setGeneratedNotes(drawn.map((note) => ({ note, status: "pending" })));
     setCurrentNoteIndex(0);
     setScore({ correct: 0, incorrect: 0 });
@@ -78,7 +71,7 @@ export const ScoreFlashcards = () => {
       setGeneratedNotes(newNotes);
 
       // Mettre à jour la répétition espacée (persistée)
-      saveBoxes(SRS_KEY, recordResult(loadBoxes(SRS_KEY), currentNote, isCorrect));
+      review(DECK.notes, currentNote, isCorrect);
 
       // Mettre à jour le score
       setScore((prev) => ({

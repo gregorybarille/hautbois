@@ -8,6 +8,7 @@ import {
   Ear,
   Drum,
   LineChart,
+  CalendarClock,
   Menu,
   X,
   LucideIcon,
@@ -36,9 +37,11 @@ export type View =
   | "scales"
   | "earTraining"
   | "rhythm"
-  | "progress";
+  | "progress"
+  | "review";
 
 const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
+  { view: "review", icon: CalendarClock, labelKey: "nav.review" },
   { view: "scoreFlashcards", icon: Music, labelKey: "nav.score" },
   { view: "nameFlashcards", icon: FileText, labelKey: "nav.name" },
   { view: "fingeringHelper", icon: HandMetal, labelKey: "nav.fingering" },
