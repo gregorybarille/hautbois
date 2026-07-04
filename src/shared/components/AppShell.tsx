@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Home, Music, FileText, HandMetal, LucideIcon } from "lucide-react";
+import { Music, FileText, HandMetal, LucideIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,6 @@ export type View =
   | "fingeringHelper";
 
 const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
-  { view: "home", icon: Home, labelKey: "nav.home" },
   { view: "scoreFlashcards", icon: Music, labelKey: "nav.score" },
   { view: "nameFlashcards", icon: FileText, labelKey: "nav.name" },
   { view: "fingeringHelper", icon: HandMetal, labelKey: "nav.fingering" },
@@ -68,14 +67,20 @@ export const AppShell = ({
   );
 
   const brand = (
-    <div className="flex min-w-0 items-center gap-2">
+    <button
+      type="button"
+      onClick={() => onViewChange("home")}
+      aria-label={t("nav.home")}
+      aria-current={view === "home" ? "page" : undefined}
+      className="flex min-w-0 items-center gap-2 rounded-lg text-left transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+    >
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <Music className="size-5" />
       </span>
       <span className="truncate text-lg font-semibold text-foreground">
         {t("app.title")}
       </span>
-    </div>
+    </button>
   );
 
   return (
