@@ -10,6 +10,7 @@ import { Home } from "./features/home";
 import { ScoreFlashcards } from "./features/score-flashcards";
 import { NameFlashcards } from "./features/name-flashcards";
 import { FingeringHelper } from "./features/fingering-helper";
+import { Scales } from "./features/scales";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -35,6 +36,7 @@ function App() {
       {view === "fingeringHelper" && (
         <FingeringHelper key={instrument.id} instrument={instrument} />
       )}
+      {view === "scales" && <Scales instrument={instrument} />}
     </AppShell>
   );
 }

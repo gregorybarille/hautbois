@@ -13,9 +13,18 @@ import {
 import { MusicScore } from "../../shared/components/music/MusicScore";
 import { NOTE_BASES } from "../../shared/music/notes";
 import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
+import {
+  loadBoxes,
+  recordResult,
+  saveBoxes,
+  weightedDraw,
+} from "../../shared/srs/leitner";
 
 // Notes naturelles uniquement (Do, Ré, Mi, Fa, Sol, La, Si)
 const NATURAL_NOTES: string[] = NOTE_BASES;
+
+// Spaced-repetition store key for score-reading practice.
+const SRS_KEY = "srs-score-notes";
 
 const STATUS_COLORS = {
   current: "#3b82f6",
@@ -35,18 +44,10 @@ export const ScoreFlashcards = () => {
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
 
-  // Générer 10 notes aléatoires
+  // Générer 10 notes en privilégiant les notes les moins maîtrisées
   const generateNotes = useCallback(() => {
-    const notes: NoteResult[] = [];
-    for (let i = 0; i < 10; i++) {
-      const randomNote =
-        NATURAL_NOTES[Math.floor(Math.random() * NATURAL_NOTES.length)];
-      notes.push({
-        note: randomNote,
-        status: "pending",
-      });
-    }
-    setGeneratedNotes(notes);
+    const drawn = weightedDraw(NATURAL_NOTES, loadBoxes(SRS_KEY), 10);
+    setGeneratedNotes(drawn.map((note) => ({ note, status: "pending" })));
     setCurrentNoteIndex(0);
     setScore({ correct: 0, incorrect: 0 });
   }, []);
@@ -71,6 +72,9 @@ export const ScoreFlashcards = () => {
         userAnswer: selectedNote,
       };
       setGeneratedNotes(newNotes);
+
+      // Mettre à jour la répétition espacée (persistée)
+      saveBoxes(SRS_KEY, recordResult(loadBoxes(SRS_KEY), currentNote, isCorrect));
 
       // Mettre à jour le score
       setScore((prev) => ({

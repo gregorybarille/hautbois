@@ -13,7 +13,8 @@
     "home": "Accueil",
     "score": "Partition",
     "name": "Nom de notes",
-    "fingering": "Doigtés"
+    "fingering": "Doigtés",
+    "scales": "Gammes"
   },
   "menu": {
     "title": "Menu Principal",
@@ -29,6 +30,28 @@
     "fingeringHelper": {
       "title": "Guide des Doigtés",
       "description": "Découvrez comment jouer chaque note sur votre instrument"
+    },
+    "scales": {
+      "title": "Gammes & Arpèges",
+      "description": "Explorez les gammes et arpèges sur la portée et au doigté"
+    }
+  },
+  "scales": {
+    "root": "Tonique",
+    "type": "Type",
+    "play": "Écouter la gamme",
+    "playNote": "Écouter la note",
+    "prev": "Note précédente",
+    "next": "Note suivante",
+    "noFingering": "Doigté indisponible pour cette note sur cet instrument",
+    "types": {
+      "major": "Majeure",
+      "minor_natural": "Mineure naturelle",
+      "minor_harmonic": "Mineure harmonique",
+      "minor_melodic": "Mineure mélodique",
+      "arp_major": "Arpège majeur",
+      "arp_minor": "Arpège mineur",
+      "chromatic": "Chromatique"
     }
   },
   "common": {

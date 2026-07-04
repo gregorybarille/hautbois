@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Music, FileText, HandMetal, LucideIcon } from "lucide-react";
+import { Music, FileText, HandMetal, ListMusic, LucideIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,12 +20,14 @@ export type View =
   | "home"
   | "scoreFlashcards"
   | "nameFlashcards"
-  | "fingeringHelper";
+  | "fingeringHelper"
+  | "scales";
 
 const NAV: { view: View; icon: LucideIcon; labelKey: string }[] = [
   { view: "scoreFlashcards", icon: Music, labelKey: "nav.score" },
   { view: "nameFlashcards", icon: FileText, labelKey: "nav.name" },
   { view: "fingeringHelper", icon: HandMetal, labelKey: "nav.fingering" },
+  { view: "scales", icon: ListMusic, labelKey: "nav.scales" },
 ];
 
 interface AppShellProps {

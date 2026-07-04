@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Music, FileText, HandMetal } from "lucide-react";
+import { Music, FileText, HandMetal, ListMusic } from "lucide-react";
 import { MenuCard, View } from "@/shared/components";
 
 interface HomeProps {
@@ -20,7 +20,7 @@ export const Home = ({ onNavigate }: HomeProps) => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <MenuCard
           title={t("menu.scoreFlashcards.title")}
           description={t("menu.scoreFlashcards.description")}
@@ -38,6 +38,12 @@ export const Home = ({ onNavigate }: HomeProps) => {
           description={t("menu.fingeringHelper.description")}
           icon={HandMetal}
           onClick={() => onNavigate("fingeringHelper")}
+        />
+        <MenuCard
+          title={t("menu.scales.title")}
+          description={t("menu.scales.description")}
+          icon={ListMusic}
+          onClick={() => onNavigate("scales")}
         />
       </div>
     </div>
