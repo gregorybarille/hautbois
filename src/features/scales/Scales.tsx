@@ -124,15 +124,18 @@ export const Scales = ({ instrument }: ScalesProps) => {
         </label>
 
         {audioOk && (
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold tracking-wide text-transparent uppercase select-none">
+          <div className="flex flex-col gap-1">
+            <span
+              aria-hidden="true"
+              className="text-xs font-semibold tracking-wide text-transparent uppercase select-none"
+            >
               {t("scales.play")}
             </span>
             <Button variant="outline" onClick={playScale}>
               <Play className="size-4 fill-green-600 text-green-600 dark:fill-green-500 dark:text-green-500" />
               {t("scales.play")}
             </Button>
-          </label>
+          </div>
         )}
       </div>
 
