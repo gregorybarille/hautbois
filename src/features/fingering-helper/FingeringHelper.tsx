@@ -65,29 +65,26 @@ export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
     else if (variations.sharp) setSelectedNote(variations.sharp);
   };
 
-  // Partition section: staff (fills available width) + accidental variations.
+  // Partition section: staff with the accidental variations inside the box,
+  // top-aligned so the score sits high on the page.
   const partition = (
-    <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col justify-center">
-        <MusicScore
-          notes={naturalNotes}
-          activeNote={currentBaseNote}
-          onNoteClick={handleScoreClick}
-          darkMode={darkMode}
-        />
-      </div>
-
-      <div className="mt-5 flex flex-col items-center">
-        <span className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-          Variations
-        </span>
-        <div className="flex gap-4">
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col pt-2">
+      <MusicScore
+        notes={naturalNotes}
+        activeNote={currentBaseNote}
+        onNoteClick={handleScoreClick}
+        darkMode={darkMode}
+      >
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            Variations
+          </span>
           <Button
             type="button"
             variant={isFlat ? "default" : "outline"}
             disabled={!variations.flat}
             onClick={toggleFlat}
-            className="size-14 rounded-full font-serif text-3xl"
+            className="size-11 rounded-full font-serif text-2xl"
           >
             ♭
           </Button>
@@ -96,12 +93,12 @@ export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
             variant={isSharp ? "default" : "outline"}
             disabled={!variations.sharp}
             onClick={toggleSharp}
-            className="size-14 rounded-full font-serif text-3xl"
+            className="size-11 rounded-full font-serif text-2xl"
           >
             ♯
           </Button>
         </div>
-      </div>
+      </MusicScore>
     </section>
   );
 
@@ -109,7 +106,7 @@ export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
   const chartPanel = (
     <aside
       className={cn(
-        "flex min-h-0 flex-col items-center rounded-2xl border border-border bg-card/40 p-4",
+        "flex min-h-0 flex-col items-center p-4",
         isWide ? "w-full shrink-0" : "shrink-0 lg:w-72",
       )}
     >
@@ -134,7 +131,7 @@ export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
 
       <div
         className={cn(
-          "flex min-h-0 flex-1 gap-6",
+          "flex min-h-0 min-w-0 flex-1 gap-6",
           isWide ? "flex-col" : "flex-col lg:flex-row lg:items-stretch",
         )}
       >

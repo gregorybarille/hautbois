@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { noteStep, parseNote } from "../../music/notes";
 
 interface MusicScoreProps {
@@ -9,6 +9,8 @@ interface MusicScoreProps {
   // Per-note color override (e.g. quiz status); wins over activeNote color.
   noteColor?: (note: string, index: number) => string | undefined;
   noteSpacing?: number;
+  // Extra controls rendered inside the score box, below the staff.
+  children?: ReactNode;
 }
 
 export const MusicScore = ({
@@ -18,6 +20,7 @@ export const MusicScore = ({
   darkMode = false,
   noteColor,
   noteSpacing = 50,
+  children,
 }: MusicScoreProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -75,19 +78,20 @@ export const MusicScore = ({
 
   return (
     <div
-      ref={containerRef}
       style={{
         width: "100%",
-        overflowX: "auto",
         borderRadius: "0.75rem",
         border: "1px solid",
         padding: "1rem",
-        scrollBehavior: "smooth",
         backgroundColor: bgColor,
         borderColor: borderColor,
         transition: "all 0.3s ease",
       }}
     >
+      <div
+        ref={containerRef}
+        style={{ width: "100%", overflowX: "auto", scrollBehavior: "smooth" }}
+      >
       <svg
         width={width}
         height={height}
@@ -228,6 +232,21 @@ export const MusicScore = ({
           );
         })}
       </svg>
+      </div>
+
+      {children != null && (
+        <div
+          style={{
+            marginTop: "0.75rem",
+            paddingTop: "0.75rem",
+            borderTop: `1px solid ${borderColor}`,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 };
