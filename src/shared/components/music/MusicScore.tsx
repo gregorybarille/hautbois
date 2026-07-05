@@ -234,7 +234,7 @@ export const MusicScore = ({
       </svg>
       </div>
 
-      {children && (
+      {children != null && (
         <div
           style={{
             marginTop: "0.75rem",
