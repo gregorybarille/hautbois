@@ -77,7 +77,7 @@ export const Scales = ({ instrument }: ScalesProps) => {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-5xl flex-col">
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
       <h2 className="mb-4 shrink-0 text-2xl font-semibold text-foreground">
         {t("menu.scales.title")}
       </h2>
@@ -124,10 +124,15 @@ export const Scales = ({ instrument }: ScalesProps) => {
         </label>
 
         {audioOk && (
-          <Button variant="outline" onClick={playScale} className="ml-auto">
-            <Play className="size-4" />
-            {t("scales.play")}
-          </Button>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold tracking-wide text-transparent uppercase select-none">
+              {t("scales.play")}
+            </span>
+            <Button variant="outline" onClick={playScale}>
+              <Play className="size-4 fill-green-600 text-green-600 dark:fill-green-500 dark:text-green-500" />
+              {t("scales.play")}
+            </Button>
+          </label>
         )}
       </div>
 
@@ -156,21 +161,18 @@ export const Scales = ({ instrument }: ScalesProps) => {
 
       <div
         className={cn(
-          "flex min-h-0 flex-1 gap-6",
+          "flex min-h-0 min-w-0 flex-1 gap-6",
           isWide ? "flex-col" : "flex-col lg:flex-row lg:items-stretch",
         )}
       >
-        {/* Staff */}
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1 flex-col justify-center">
-            <MusicScore
-              notes={noteNames}
-              noteSpacing={64}
-              noteColor={(_, i) => (i === index ? STEP_COLOR : undefined)}
-              onNoteClick={(note) => goTo(noteNames.indexOf(note))}
-              darkMode={darkMode}
-            />
-          </div>
+        {/* Staff + stepper, top-aligned like the fingering guide */}
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col pt-2">
+          <MusicScore
+            notes={noteNames}
+            noteColor={(_, i) => (i === index ? STEP_COLOR : undefined)}
+            onNoteClick={(note) => goTo(noteNames.indexOf(note))}
+            darkMode={darkMode}
+          />
 
           {/* Stepper */}
           <div className="mt-5 flex items-center justify-center gap-4">
@@ -216,18 +218,18 @@ export const Scales = ({ instrument }: ScalesProps) => {
         {/* Fingering for the current note */}
         <aside
           className={cn(
-            "flex min-h-0 flex-col items-center rounded-2xl border border-border bg-card/40 p-4",
+            "flex min-h-0 flex-col items-center p-4",
             isWide ? "w-full shrink-0" : "shrink-0 lg:w-72",
           )}
         >
-          <h3 className="mb-3 shrink-0 text-xl font-semibold text-foreground">
+          <h3 className="mb-3 shrink-0 text-3xl font-semibold text-foreground">
             {current?.name}
           </h3>
           <div className="flex min-h-0 w-full flex-1 items-center justify-center">
             {fingeringAvailable ? (
               <instrument.NoteChart
                 note={current.name}
-                height={isWide ? 200 : 560}
+                height={isWide ? 200 : 650}
                 darkMode={darkMode}
               />
             ) : (
