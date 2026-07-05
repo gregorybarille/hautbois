@@ -1,0 +1,281 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1701" font-family="Georgia, 'Times New Roman', serif">
+  <title>Hautbois — anatomie</title>
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#030303"/>
+      <stop offset=".12" stop-color="#0c0a09"/>
+      <stop offset=".3" stop-color="#1f1a15"/>
+      <stop offset=".44" stop-color="#3c3226"/>
+      <stop offset=".5" stop-color="#514436"/>
+      <stop offset=".56" stop-color="#372d22"/>
+      <stop offset=".7" stop-color="#151110"/>
+      <stop offset=".88" stop-color="#060505"/>
+      <stop offset="1" stop-color="#020202"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#63676c"/>
+      <stop offset=".18" stop-color="#9ba0a6"/>
+      <stop offset=".38" stop-color="#e9ebed"/>
+      <stop offset=".5" stop-color="#ffffff"/>
+      <stop offset=".62" stop-color="#d3d6d9"/>
+      <stop offset=".8" stop-color="#8e9298"/>
+      <stop offset="1" stop-color="#5d6165"/>
+    </linearGradient>
+    <linearGradient id="silverV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8eaec"/>
+      <stop offset=".35" stop-color="#f6f7f8"/>
+      <stop offset=".6" stop-color="#b4b9be"/>
+      <stop offset=".85" stop-color="#7c8087"/>
+      <stop offset="1" stop-color="#5a5e64"/>
+    </linearGradient>
+    <radialGradient id="padCup" cx=".38" cy=".32" r=".85">
+      <stop offset="0" stop-color="#f0f2f4"/>
+      <stop offset=".4" stop-color="#c6cbd0"/>
+      <stop offset=".72" stop-color="#8f959c"/>
+      <stop offset="1" stop-color="#54585e"/>
+    </radialGradient>
+    <linearGradient id="cane" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b18549"/>
+      <stop offset=".3" stop-color="#dcbe8a"/>
+      <stop offset=".5" stop-color="#eedcae"/>
+      <stop offset=".7" stop-color="#d6b67d"/>
+      <stop offset="1" stop-color="#9e7440"/>
+    </linearGradient>
+    <linearGradient id="thread" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5f180f"/>
+      <stop offset=".35" stop-color="#a53a2a"/>
+      <stop offset=".5" stop-color="#c25640"/>
+      <stop offset=".65" stop-color="#9c3324"/>
+      <stop offset="1" stop-color="#4f120b"/>
+    </linearGradient>
+    <linearGradient id="staple" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#17120e"/>
+      <stop offset=".45" stop-color="#3b2f25"/>
+      <stop offset=".6" stop-color="#4a3b2e"/>
+      <stop offset="1" stop-color="#120e0b"/>
+    </linearGradient>
+    <radialGradient id="bore" cx=".5" cy=".45" r=".65">
+      <stop offset="0" stop-color="#000000"/>
+      <stop offset=".7" stop-color="#0a0605"/>
+      <stop offset=".92" stop-color="#2a1c14"/>
+      <stop offset="1" stop-color="#4a3320"/>
+    </radialGradient>
+    <filter id="keyShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="1.5" dy="2.5" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="soft" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+  </defs>
+
+  <!-- ══════════ ANCHE ══════════ -->
+  <g id="anche">
+    <path d="M476,97 C476,93 494,93 494,97 C493,120 492,140 492,158 L478,158 C478,140 477,120 476,97 Z" fill="url(#cane)"/>
+    <path d="M476.3,98 L493.7,98 L493.2,122 L476.8,122 Z" fill="#f0e4c0" opacity=".9"/>
+    <path d="M477.2,124 L492.8,124 L492.2,158 L477.8,158 Z" fill="#b08a4e" opacity=".55"/>
+    <line x1="485" y1="95" x2="485" y2="157" stroke="#a87c49" stroke-width="1.2" opacity=".8"/>
+    <line x1="480.5" y1="100" x2="481.5" y2="155" stroke="#8f6a3c" stroke-width=".7" opacity=".35"/>
+    <line x1="489.5" y1="100" x2="488.5" y2="155" stroke="#8f6a3c" stroke-width=".7" opacity=".35"/>
+    <!-- thread wrap -->
+    <rect x="475" y="157" width="20" height="36" rx="7" fill="url(#thread)"/>
+    <g stroke="#63180e" stroke-width="1.7" opacity=".65">
+      <line x1="476" y1="167" x2="494" y2="162"/>
+      <line x1="476" y1="176" x2="494" y2="171"/>
+      <line x1="476" y1="185" x2="494" y2="180"/>
+    </g>
+    <ellipse cx="481" cy="167" rx="3" ry="8" fill="#e08a6d" opacity=".35" filter="url(#soft)"/>
+    <!-- dark staple, metal collar -->
+    <path d="M478,192 L477,223 L493,223 L492,192 Z" fill="url(#staple)"/>
+    <rect x="475.5" y="221" width="19" height="8" rx="3" fill="url(#silver)"/>
+  </g>
+
+  <!-- ══════════ CORPS ══════════ -->
+  <g id="corps">
+    <!-- crown ("onion") top of upper joint -->
+    <path d="M471,229 L499,229 C504,238 509,247 510.5,257 C511.5,267 506,274 503.5,280 L466.5,280 C464,274 458.5,267 459.5,257 C461,247 466,238 471,229 Z" fill="url(#wood)"/>
+    <ellipse cx="485" cy="232" rx="8" ry="2" fill="#000" opacity=".85"/>
+    <rect x="462" y="280" width="46" height="11" rx="4.5" fill="url(#wood)"/>
+    <line x1="464" y1="281.5" x2="506" y2="281.5" stroke="#000" stroke-width="1" opacity=".55"/>
+    <!-- upper joint -->
+    <path d="M463,291 L461.5,830 L508.5,830 L507,291 Z" fill="url(#wood)"/>
+    <!-- centre tenon band -->
+    <rect x="457" y="826" width="56" height="21" rx="7" fill="url(#wood)"/>
+    <line x1="459" y1="829" x2="511" y2="829" stroke="#000" stroke-width="1" opacity=".6"/>
+    <line x1="459" y1="843" x2="511" y2="843" stroke="#000" stroke-width="1" opacity=".6"/>
+    <!-- lower joint -->
+    <path d="M461,847 L458,1330 L512,1330 L509,847 Z" fill="url(#wood)"/>
+    <!-- metal band at bell joint (prominent in the photo) -->
+    <rect x="453.5" y="1326" width="63" height="17" rx="6" fill="url(#silver)" stroke="#565b61" stroke-width="1"/>
+    <!-- bell -->
+    <path d="M457,1341 C455,1420 448,1490 428,1548 C421,1568 418,1585 419,1601 L551,1601 C552,1585 549,1568 542,1548 C522,1490 515,1420 513,1341 Z" fill="url(#wood)"/>
+    <!-- rolled rim with bronze edge like the photo -->
+    <rect x="414" y="1595" width="142" height="32" rx="16" fill="url(#wood)"/>
+    <path d="M418,1614 C420,1622 440,1627 485,1627 C530,1627 550,1622 552,1614" fill="none" stroke="#6b4a2a" stroke-width="3" opacity=".65"/>
+    <ellipse cx="485" cy="1622" rx="62" ry="11" fill="url(#bore)"/>
+    <!-- interior reflection squiggle -->
+    <path d="M448,1568 C452,1556 470,1551 480,1557 C486,1561 494,1553 502,1555 C510,1557 508,1565 498,1569 C480,1576 456,1576 448,1568 Z" fill="#cfc8bd" opacity=".45"/>
+    <!-- polished highlights -->
+    <rect x="472" y="300" width="5" height="515" fill="#fff" opacity=".13" filter="url(#soft)"/>
+    <rect x="470" y="855" width="6" height="465" fill="#fff" opacity=".13" filter="url(#soft)"/>
+    <path d="M466,1355 C463,1430 455,1500 438,1555 L446,1558 C462,1502 470,1432 473,1357 Z" fill="#fff" opacity=".09" filter="url(#soft)"/>
+    <path d="M508,300 L510,828" stroke="#6d5844" stroke-width="1.6" opacity=".35" fill="none"/>
+    <path d="M510,855 L513,1328" stroke="#6d5844" stroke-width="1.6" opacity=".35" fill="none"/>
+    <path d="M514,1352 C516,1430 523,1495 542,1550 C549,1570 551,1585 550.5,1598" stroke="#6d5844" stroke-width="1.8" opacity=".3" fill="none"/>
+  </g>
+
+  <!-- ══════════ CLÉS ══════════ -->
+  <g id="cles" filter="url(#keyShadow)">
+    <!-- ── upper joint: axles and posts ── -->
+    <rect x="511" y="300" width="3.5" height="528" rx="1.7" fill="url(#silver)"/>
+    <rect x="455.5" y="430" width="3.5" height="400" rx="1.7" fill="url(#silver)"/>
+    <g fill="url(#silver)" stroke="#6a6e73" stroke-width=".6">
+      <rect x="508.5" y="304" width="8.5" height="11" rx="3"/>
+      <rect x="508.5" y="470" width="8.5" height="10" rx="3"/>
+      <rect x="508.5" y="640" width="8.5" height="10" rx="3"/>
+      <rect x="508.5" y="814" width="8.5" height="11" rx="3"/>
+      <rect x="452.5" y="434" width="8.5" height="10" rx="3"/>
+      <rect x="452.5" y="620" width="8.5" height="10" rx="3"/>
+      <rect x="452.5" y="817" width="8.5" height="11" rx="3"/>
+    </g>
+    <!-- octave key: ball + lever, top right -->
+    <rect x="503" y="316" width="14" height="6" rx="3" fill="url(#silver)"/>
+    <circle cx="519" cy="320" r="6.5" fill="url(#padCup)" stroke="#6b7076" stroke-width=".8"/>
+    <!-- second octave touch, left -->
+    <rect x="461" y="394" width="12" height="6" rx="3" fill="url(#silver)"/>
+    <ellipse cx="457" cy="398" rx="8" ry="11" fill="url(#silverV)" stroke="#7d8187" stroke-width=".7"/>
+    <!-- trill touches, right -->
+    <g fill="url(#silverV)" stroke="#7d8187" stroke-width=".7">
+      <rect x="519" y="346" width="26" height="12" rx="6" transform="rotate(7 519 346)"/>
+      <rect x="521" y="380" width="26" height="12" rx="6" transform="rotate(7 521 380)"/>
+    </g>
+    <!-- small side touches, left column -->
+    <g fill="url(#silverV)" stroke="#7d8187" stroke-width=".7">
+      <ellipse cx="451" cy="470" rx="9" ry="6.5" transform="rotate(-10 451 470)"/>
+      <ellipse cx="449" cy="532" rx="9" ry="6.5" transform="rotate(-6 449 532)"/>
+    </g>
+
+    <!-- left-hand plates -->
+    <g>
+      <rect x="458" y="501" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="485" cy="505" r="21" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="485" cy="505" r="14" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="485" cy="505" r="6.5" fill="#15100c"/>
+    </g>
+    <circle cx="518" cy="540" r="8" fill="url(#padCup)" stroke="#7d8187" stroke-width=".7"/>
+    <g>
+      <rect x="458" y="571" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="485" cy="575" r="21" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="485" cy="575" r="14" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="485" cy="575" r="3" fill="#3a3d40"/>
+    </g>
+    <g>
+      <rect x="458" y="641" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="485" cy="645" r="21" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="485" cy="645" r="14" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="485" cy="645" r="3" fill="#3a3d40"/>
+    </g>
+
+    <!-- G# spatula, left, near the joint -->
+    <rect x="452" y="778" width="12" height="6" rx="3" fill="url(#silver)"/>
+    <ellipse cx="444" cy="782" rx="13" ry="9" transform="rotate(-15 444 782)" fill="url(#silverV)" stroke="#7d8187" stroke-width=".7"/>
+    <!-- side levers, right, above the joint -->
+    <g fill="url(#silverV)" stroke="#7d8187" stroke-width=".7">
+      <rect x="518" y="754" width="30" height="11" rx="5.5" transform="rotate(8 518 754)"/>
+      <rect x="521" y="788" width="30" height="11" rx="5.5" transform="rotate(8 521 788)"/>
+    </g>
+
+    <!-- ── joint cluster ── -->
+    <!-- left pinky spatulas -->
+    <rect x="450" y="843" width="12" height="6" rx="3" fill="url(#silver)"/>
+    <ellipse cx="440" cy="847" rx="15" ry="10" transform="rotate(-8 440 847)" fill="url(#silverV)" stroke="#7d8187" stroke-width=".8"/>
+    <rect x="448" y="871" width="12" height="6" rx="3" fill="url(#silver)"/>
+    <ellipse cx="437" cy="875" rx="15" ry="10" transform="rotate(-4 437 875)" fill="url(#silverV)" stroke="#7d8187" stroke-width=".8"/>
+    <!-- long trill levers, right -->
+    <g fill="url(#silverV)" stroke="#7d8187" stroke-width=".7">
+      <rect x="522" y="840" width="38" height="10" rx="5" transform="rotate(5 522 840)"/>
+      <rect x="525" y="864" width="38" height="10" rx="5" transform="rotate(7 525 864)"/>
+    </g>
+
+    <!-- ── lower joint: axles and posts ── -->
+    <rect x="514" y="880" width="3.5" height="416" rx="1.7" fill="url(#silver)"/>
+    <rect x="450" y="880" width="3.5" height="452" rx="1.7" fill="url(#silver)"/>
+    <g fill="url(#silver)" stroke="#6a6e73" stroke-width=".6">
+      <rect x="511.5" y="884" width="8.5" height="11" rx="3"/>
+      <rect x="511.5" y="1058" width="8.5" height="10" rx="3"/>
+      <rect x="511.5" y="1286" width="8.5" height="11" rx="3"/>
+      <rect x="447.5" y="884" width="8.5" height="11" rx="3"/>
+      <rect x="447.5" y="1100" width="8.5" height="10" rx="3"/>
+      <rect x="447.5" y="1322" width="8.5" height="11" rx="3"/>
+    </g>
+
+    <!-- right-hand plates -->
+    <g>
+      <rect x="500" y="936" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="484" cy="940" r="22" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="484" cy="940" r="15" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="484" cy="940" r="3" fill="#3a3d40"/>
+    </g>
+    <ellipse cx="520" cy="974" rx="7" ry="9" fill="url(#padCup)" stroke="#7d8187" stroke-width=".7"/>
+    <g>
+      <rect x="500" y="1006" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="484" cy="1010" r="22" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="484" cy="1010" r="15" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="484" cy="1010" r="3" fill="#3a3d40"/>
+    </g>
+    <g>
+      <rect x="500" y="1076" width="12" height="7" rx="3" fill="url(#silver)"/>
+      <circle cx="484" cy="1080" r="22" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="484" cy="1080" r="15" fill="none" stroke="#9aa0a6" stroke-width="1" opacity=".8"/>
+      <circle cx="484" cy="1080" r="3" fill="#3a3d40"/>
+    </g>
+    <!-- F "banana" key -->
+    <path d="M509,1104 C520,1099 530,1104 531,1114 C532,1124 522,1130 511,1126 C505,1122 504,1108 509,1104 Z" fill="url(#silverV)" stroke="#7d8187" stroke-width=".7"/>
+
+    <!-- right pinky paddles -->
+    <g fill="url(#silverV)" stroke="#7d8187" stroke-width=".8">
+      <ellipse cx="532" cy="1152" rx="20" ry="12" transform="rotate(12 532 1152)"/>
+      <ellipse cx="536" cy="1190" rx="18" ry="11" transform="rotate(8 536 1190)"/>
+      <ellipse cx="527" cy="1224" rx="12" ry="8" transform="rotate(10 527 1224)"/>
+    </g>
+
+    <!-- low C / B pad cups -->
+    <g>
+      <rect x="454" y="1248" width="16" height="6" rx="3" fill="url(#silver)"/>
+      <circle cx="468" cy="1252" r="17" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="468" cy="1252" r="2.6" fill="#3a3d40"/>
+    </g>
+    <g>
+      <rect x="454" y="1304" width="18" height="6" rx="3" fill="url(#silver)"/>
+      <circle cx="474" cy="1308" r="18" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+      <circle cx="474" cy="1308" r="2.6" fill="#3a3d40"/>
+    </g>
+
+    <!-- low B-flat: rod down to the bell, pad cup + guard -->
+    <rect x="450" y="1332" width="3.5" height="46" rx="1.7" fill="url(#silver)"/>
+    <rect x="446.5" y="1372" width="8.5" height="11" rx="3" fill="url(#silver)" stroke="#6a6e73" stroke-width=".6"/>
+    <rect x="455" y="1381" width="14" height="6" rx="3" fill="url(#silver)"/>
+    <circle cx="462" cy="1385" r="18" fill="url(#padCup)" stroke="#6b7076" stroke-width="1"/>
+    <circle cx="462" cy="1385" r="2.6" fill="#3a3d40"/>
+    <path d="M516,1344 C522,1370 524,1396 522,1422" fill="none" stroke="url(#silver)" stroke-width="4.5" stroke-linecap="round"/>
+    <rect x="512" y="1348" width="9" height="5" rx="2.5" fill="url(#silver)"/>
+    <rect x="516" y="1414" width="9" height="5" rx="2.5" fill="url(#silver)"/>
+  </g>
+
+  <!-- ══════════ Légendes ══════════ -->
+  <g id="legendes" font-size="30" fill="#3a3a3a">
+    <g stroke="#8a8a8a" stroke-width="1.5" fill="none">
+      <polyline points="336,112 420,112 473,110"/>
+      <polyline points="620,207 540,207 497,207"/>
+      <polyline points="336,424 410,424 460,424"/>
+      <polyline points="640,554 580,554 512,556"/>
+      <polyline points="640,978 600,978 524,978"/>
+      <polyline points="648,1554 600,1554 542,1554"/>
+    </g>
+    <text x="328" y="121" text-anchor="end">Anche</text>
+    <text x="630" y="216">Tube</text>
+    <text x="328" y="433" text-anchor="end">Corps du haut</text>
+    <text x="650" y="563">Clés</text>
+    <text x="650" y="987">Corps du bas</text>
+    <text x="658" y="1563">Pavillon</text>
+  </g>
+</svg>

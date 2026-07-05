@@ -109,7 +109,7 @@ export const FingeringHelper = ({ instrument }: FingeringHelperProps) => {
   const chartPanel = (
     <aside
       className={cn(
-        "flex min-h-0 flex-col items-center rounded-2xl border border-border bg-card/40 p-4",
+        "flex min-h-0 flex-col items-center p-4",
         isWide ? "w-full shrink-0" : "shrink-0 lg:w-72",
       )}
     >
