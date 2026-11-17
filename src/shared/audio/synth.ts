@@ -27,6 +27,14 @@ export function isAudioSupported(): boolean {
   );
 }
 
+// Delay between scheduling a sound and hearing it (large on Bluetooth).
+// Timing drills add it to expected tap times.
+export function outputLatencyMs(): number {
+  const audio = getContext();
+  if (!audio) return 0;
+  return ((audio.outputLatency || 0) + (audio.baseLatency || 0)) * 1000;
+}
+
 // Schedule a single tone at the given absolute AudioContext time.
 function scheduleTone(
   audio: AudioContext,

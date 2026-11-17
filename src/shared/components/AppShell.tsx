@@ -153,8 +153,7 @@ export const AppShell = ({
           </p>
           {instrumentPicker}
         </div>
-        <div className="flex items-center justify-between border-t border-border px-2 pt-3">
-          <span className="text-sm text-muted-foreground">{t("app.title")}</span>
+        <div className="flex items-center justify-end border-t border-border px-2 pt-3">
           <ThemeToggle />
         </div>
       </div>

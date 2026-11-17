@@ -1,17 +1,26 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Mic, MicOff } from "lucide-react";
+import { RefreshCw, Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MusicScore } from "../../shared/components/music/MusicScore";
-import { NOTE_BASES } from "../../shared/music/notes";
+import { NOTE_BASES, REGISTERS, Register, noteSemitone, withRegister } from "../../shared/music/notes";
+import { semitoneToFrequency } from "../../shared/music/theory";
+import { isAudioSupported, playFrequency } from "../../shared/audio/synth";
 import { useNoteSpeechRecognition } from "../../shared/hooks/useNoteSpeechRecognition";
 import { review, selectPractice } from "../../shared/srs/scheduler";
 import { DECK } from "../../shared/srs/decks";
@@ -27,32 +36,57 @@ const STATUS_COLORS = {
 };
 
 interface NoteResult {
-  note: string;
+  note: string; // base name (Do..Si), used for grading and SRS
+  pitch: string; // register-applied name (e.g. "Do Grave"), used for display/audio
   status: "pending" | "correct" | "incorrect";
   userAnswer?: string;
 }
 
 export const ScoreFlashcards = () => {
   const { t } = useTranslation();
+  const audioOk = isAudioSupported();
   const [generatedNotes, setGeneratedNotes] = useState<NoteResult[]>([]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, incorrect: 0 });
+  const [register, setRegister] = useState<Register>("middle");
   // Ensure each completed round is logged to history exactly once.
   const recorded = useRef(false);
 
   // Générer 10 notes en privilégiant les notes les moins maîtrisées
-  const generateNotes = useCallback(() => {
-    recorded.current = false;
-    const drawn = selectPractice(DECK.notes, NATURAL_NOTES, 10);
-    setGeneratedNotes(drawn.map((note) => ({ note, status: "pending" })));
-    setCurrentNoteIndex(0);
-    setScore({ correct: 0, incorrect: 0 });
-  }, []);
+  const generateNotes = useCallback(
+    (reg: Register = register) => {
+      recorded.current = false;
+      const drawn = selectPractice(DECK.notes, NATURAL_NOTES, 10);
+      setGeneratedNotes(
+        drawn.map((note) => ({
+          note,
+          pitch: withRegister(note, reg),
+          status: "pending",
+        })),
+      );
+      setCurrentNoteIndex(0);
+      setScore({ correct: 0, incorrect: 0 });
+    },
+    [register],
+  );
+
+  const handleRegisterChange = (value: Register) => {
+    setRegister(value);
+    generateNotes(value);
+  };
 
   // Initialiser les notes au montage
   useEffect(() => {
     generateNotes();
-  }, [generateNotes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const playCurrent = () => {
+    const current = generatedNotes[currentNoteIndex];
+    if (!current) return;
+    const semitone = noteSemitone(current.pitch);
+    if (semitone !== null) playFrequency(semitoneToFrequency(semitone));
+  };
 
   // Vérifier la réponse
   const checkAnswer = useCallback(
@@ -112,6 +146,30 @@ export const ScoreFlashcards = () => {
         </p>
       </div>
 
+      {/* Controls */}
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("common.register")}
+          </span>
+          <Select
+            value={register}
+            onValueChange={(v) => handleRegisterChange(v as Register)}
+          >
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {REGISTERS.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {t(`common.registers.${r}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+      </div>
+
       {!voice.supported && (
         <Alert className="text-amber-600 dark:text-amber-400">
           <AlertTitle>Dictée vocale non disponible</AlertTitle>
@@ -148,7 +206,7 @@ export const ScoreFlashcards = () => {
       {/* Partition musicale */}
       <div className="overflow-hidden rounded-2xl border-2 border-blue-500 bg-slate-50 p-4 dark:bg-slate-900">
         <MusicScore
-          notes={generatedNotes.map((n) => n.note)}
+          notes={generatedNotes.map((n) => n.pitch)}
           noteSpacing={70}
           noteColor={(_, index) => {
             if (index === currentNoteIndex) return STATUS_COLORS.current;
@@ -189,6 +247,22 @@ export const ScoreFlashcards = () => {
               </TooltipContent>
             </Tooltip>
 
+            {audioOk && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={playCurrent}
+                    size="icon-lg"
+                    variant="secondary"
+                    className="size-13 rounded-full text-blue-600 dark:text-blue-400"
+                  >
+                    <Volume2 className="size-6" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("scales.playNote")}</TooltipContent>
+              </Tooltip>
+            )}
+
             {voice.transcript && (
               <div className="rounded-lg border-2 border-blue-500 bg-blue-50 px-4 py-2 text-center dark:bg-blue-950/40">
                 <span className="text-sm text-muted-foreground">
@@ -215,7 +289,7 @@ export const ScoreFlashcards = () => {
           </div>
 
           <div className="flex justify-center">
-            <Button variant="outline" onClick={generateNotes}>
+            <Button variant="outline" onClick={() => generateNotes()}>
               <RefreshCw className="size-5" />
               Générer de nouvelles notes
             </Button>
@@ -236,7 +310,7 @@ export const ScoreFlashcards = () => {
             </p>
           </div>
 
-          <Button size="lg" onClick={generateNotes}>
+          <Button size="lg" onClick={() => generateNotes()}>
             <RefreshCw className="size-6" />
             Nouvelle série
           </Button>

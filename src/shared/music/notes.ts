@@ -35,6 +35,16 @@ const BASE_SEMITONES: Record<NoteBase, number> = {
 
 export const NOTE_BASES = Object.keys(BASE_STEPS) as NoteBase[];
 
+export const REGISTERS: Register[] = ["grave", "middle", "aigu"];
+
+// Apply a register to a plain (or already-accidental'd) note name, e.g.
+// withRegister("Fa#", "aigu") -> "Fa# Aigu". "middle" is the unsuffixed form.
+export function withRegister(name: string, register: Register): string {
+  if (register === "grave") return `${name} Grave`;
+  if (register === "aigu") return `${name} Aigu`;
+  return name;
+}
+
 // The 12 pitch classes in ascending order, using the app's spelling
 // convention (sharps for Do/Fa/Sol, flats for Mi/Si).
 export const CHROMATIC_NOTES = [

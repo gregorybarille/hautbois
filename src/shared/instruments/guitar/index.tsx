@@ -6,7 +6,7 @@ export const guitar: InstrumentConfig = {
   id: "guitar",
   labelKey: "instruments.guitar",
   notes: GUITAR_NOTES,
-  layout: "wide",
+  layout: "tall",
   NoteChart: ({ note, darkMode }) => {
     const chord = GUITAR_CHORDS[note];
     if (!chord) return null;

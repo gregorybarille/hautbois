@@ -26,8 +26,7 @@ interface KeyLabel {
 }
 
 // Schematic geometry (vertical, reed at the top) keyed by the OboeKeys field
-// it reflects. Positions follow the instrument in file.svg / the labeled
-// diagram in hautbois-realiste.svg: x' = (x - 485) * 0.42 + 100,
+// it reflects. Positions follow the labeled diagram in hautbois-realiste.svg: x' = (x - 485) * 0.42 + 100,
 // y' = y * 0.42 - 69.8.
 
 // Thumb/side octave keys. They live on the back of the instrument, so they
@@ -239,8 +238,8 @@ export const OboeFingeringChart = ({
   );
 };
 
-// Realistic body, a faithful port of the traced photo in file.svg (via
-// hautbois-realiste.svg): reed with pale scraped tip and dark staple, crown
+// Realistic body, a faithful port of hautbois-realiste.svg (traced from a
+// photo; the original file.svg trace is in git history): reed with pale scraped tip and dark staple, crown
 // ("onion") top, slim grenadilla joints with polished highlights, metal band
 // at the bell joint, flared bell with bronze rim edge, dark bore and interior
 // reflection. The interactive keys stay schematic on top of it.

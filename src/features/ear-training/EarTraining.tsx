@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RotateCcw, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ChoiceGrid, FeedbackRow } from "@/shared/components/quiz";
+import { cn } from "@/lib/utils";
 import {
   INTERVALS,
   INTERVAL_IDS,
@@ -14,6 +15,7 @@ import { isAudioSupported, playInterval } from "@/shared/audio/synth";
 import { pickWeighted, review } from "@/shared/srs/scheduler";
 import { DECK } from "@/shared/srs/decks";
 import { recordSession } from "@/shared/progress/history";
+import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 
 interface Question {
   semitones: number; // interval size
@@ -25,16 +27,38 @@ interface Answer {
   correct: boolean;
 }
 
-const makeQuestion = (): Question => ({
-  semitones: Number(pickWeighted(DECK.intervals, INTERVAL_IDS)),
-  root: randomIntervalRoot(),
-});
-
 const playQuestion = (q: Question) => playInterval(q.root, q.semitones);
 
 export const EarTraining = () => {
   const { t } = useTranslation();
   const audioOk = isAudioSupported();
+
+  // Which interval types are in play; persisted so a chosen subset (e.g.
+  // just seconds/thirds for a beginner) sticks across visits.
+  const [enabledIds, setEnabledIds] = useLocalStorage<string[]>(
+    "ear-enabled-intervals",
+    INTERVAL_IDS,
+  );
+  const activeIds = enabledIds.length > 0 ? enabledIds : INTERVAL_IDS;
+  const activeIntervals = INTERVALS.filter((i) =>
+    activeIds.includes(String(i.semitones)),
+  );
+
+  const toggleInterval = (id: string) => {
+    setEnabledIds((prev) => {
+      const has = prev.includes(id);
+      if (has && prev.length === 1) return prev; // keep at least one enabled
+      return has ? prev.filter((x) => x !== id) : [...prev, id];
+    });
+  };
+
+  const makeQuestion = useCallback(
+    (): Question => ({
+      semitones: Number(pickWeighted(DECK.intervals, activeIds)),
+      root: randomIntervalRoot(),
+    }),
+    [activeIds],
+  );
 
   // The first question isn't auto-played (audio needs a user gesture).
   const [question, setQuestion] = useState<Question>(makeQuestion);
@@ -93,6 +117,35 @@ export const EarTraining = () => {
         <p className="text-muted-foreground">{t("ear.instructions")}</p>
       </div>
 
+      {/* Which interval types to practice */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          {t("ear.selectIntervals")}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {INTERVALS.map((interval) => {
+            const id = String(interval.semitones);
+            const active = activeIds.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => toggleInterval(id)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted",
+                )}
+              >
+                {t(interval.labelKey)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {!audioOk && (
         <Alert variant="destructive">
           <AlertTitle>{t("ear.noAudioTitle")}</AlertTitle>
@@ -122,7 +175,7 @@ export const EarTraining = () => {
 
       {/* Interval choices */}
       <ChoiceGrid
-        options={INTERVALS}
+        options={activeIntervals}
         getId={(interval) => String(interval.semitones)}
         getLabel={(interval) => t(interval.labelKey)}
         correctId={String(question.semitones)}
