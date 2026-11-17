@@ -113,7 +113,9 @@ function spellDegree(root: string, degree: number, semitone: number): string {
   if (!parsed) return semitoneToName(semitone);
   const letterIdx = NOTE_BASES.indexOf(parsed.base) + degree;
   const letter = NOTE_BASES[letterIdx % 7];
-  const octave = Math.floor(letterIdx / 7);
+  const registerOctave =
+    parsed.register === "grave" ? -1 : parsed.register === "aigu" ? 1 : 0;
+  const octave = Math.floor(letterIdx / 7) + registerOctave;
   const natural = (noteSemitone(letter) ?? 0) + 12 * octave;
   const accidental = semitone - natural;
   if (accidental < -1 || accidental > 1 || octave < -1 || octave > 1) {

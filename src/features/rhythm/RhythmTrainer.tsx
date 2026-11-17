@@ -7,7 +7,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/shared/theme/ThemeProvider";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
-import { isAudioSupported, playClick } from "@/shared/audio/synth";
+import { isAudioSupported, outputLatencyMs, playClick } from "@/shared/audio/synth";
 import { recordSession } from "@/shared/progress/history";
 import { RhythmNotation } from "@/shared/components/music/RhythmNotation";
 import {
@@ -80,7 +80,7 @@ export const RhythmTrainer = () => {
   useEffect(() => clearTimers, [clearTimers]);
 
   const evaluate = useCallback(
-    (beatMs: number) => {
+    (beatMs: number, latency: number) => {
       const tolerance = Math.min(beatMs * 0.45, 220);
       const used = new Set<number>();
       const taken = [...taps.current].sort((a, b) => a - b);
@@ -88,7 +88,7 @@ export const RhythmTrainer = () => {
       let hits = 0;
 
       const perOnset: OnsetResult[] = pattern.onsets.map((onset) => {
-        const expected = recordStart.current + onset * beatMs;
+        const expected = recordStart.current + onset * beatMs + latency;
         let bestIdx = -1;
         let bestErr = Infinity;
         taken.forEach((tap, idx) => {
@@ -129,6 +129,9 @@ export const RhythmTrainer = () => {
     setPhase("countin");
 
     const beatMs = 60000 / bpm;
+    // Clicks are heard late by the output latency; players tap to what they
+    // hear, so expected times and the closing of the tap window shift by it.
+    const latency = outputLatencyMs();
 
     // Count-in bar
     for (let i = 0; i < BEATS_PER_BAR; i++) {
@@ -160,10 +163,10 @@ export const RhythmTrainer = () => {
     // End: clear the beat highlight at the bar boundary, but keep accepting
     // taps for the padding window before scoring.
     after(2 * BEATS_PER_BAR * beatMs, () => setActiveBeat(null));
-    after(2 * BEATS_PER_BAR * beatMs + TAP_WINDOW_PAD_MS, () => {
+    after(2 * BEATS_PER_BAR * beatMs + TAP_WINDOW_PAD_MS + latency, () => {
       accepting.current = false;
       setPhase("done");
-      evaluate(beatMs);
+      evaluate(beatMs, latency);
     });
   }, [bpm, after, clearTimers, evaluate]);
 

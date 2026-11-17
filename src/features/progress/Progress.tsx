@@ -19,7 +19,7 @@ import {
   newCount,
   weakItems,
 } from "@/shared/srs/scheduler";
-import { DECK } from "@/shared/srs/decks";
+import { DECK, parseScaleCardId } from "@/shared/srs/decks";
 import { INTERVAL_BY_ID, INTERVAL_IDS } from "@/shared/music/theory";
 import { NOTE_BASES } from "@/shared/music/notes";
 import { InstrumentConfig } from "@/shared/instruments";
@@ -88,7 +88,7 @@ export const ProgressView = ({ instrument, onNavigate }: ProgressViewProps) => {
       [loadDeck(DECK.notes), NOTE_BASES],
       [loadDeck(DECK.intervals), INTERVAL_IDS],
       [loadDeck(DECK.fingerings(instrument.id)), instrument.notes],
-      [scalesDeck, Object.keys(scalesDeck)],
+      [scalesDeck, Object.keys(scalesDeck).filter((id) => parseScaleCardId(id))],
     ];
     return {
       totalDue: decks.reduce((n, [deck, ids]) => n + dueCount(deck, ids), 0),

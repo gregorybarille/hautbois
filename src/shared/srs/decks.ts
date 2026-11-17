@@ -23,6 +23,9 @@ export function parseScaleCardId(
   if (sep < 0) return null;
   const root = id.slice(0, sep);
   const type = id.slice(sep + 1) as ScaleTypeId;
-  if (!(type in SCALE_TYPES_BY_ID) || !parseNote(root)) return null;
+  const note = parseNote(root);
+  // Aigu-rooted scales are no longer offered (they exceed the app's range).
+  if (!(type in SCALE_TYPES_BY_ID) || !note || note.register === "aigu")
+    return null;
   return { root, type };
 }

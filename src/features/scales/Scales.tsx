@@ -19,6 +19,7 @@ import {
   ScaleTypeId,
   generateScale,
   semitoneToFrequency,
+  semitoneToName,
 } from "@/shared/music/theory";
 import { isAudioSupported, playFrequency, playSequence } from "@/shared/audio/synth";
 import { review } from "@/shared/srs/scheduler";
@@ -30,6 +31,8 @@ interface ScalesProps {
 }
 
 const STEP_COLOR = "#3b82f6";
+// An aigu-rooted scale climbs past Si Aigu, the top of the app's range.
+const SCALE_REGISTERS = REGISTERS.filter((r) => r !== "aigu");
 
 export const Scales = ({ instrument }: ScalesProps) => {
   const { t } = useTranslation();
@@ -69,7 +72,9 @@ export const Scales = ({ instrument }: ScalesProps) => {
   const noteNames = useMemo(() => scale.map((n) => n.name), [scale]);
 
   const current = scale[index];
-  const fingeringAvailable = instrument.notes.includes(current?.name ?? "");
+  // Fingerings are keyed by the chromatic spelling (Si♭, not La#).
+  const chartNote = current ? semitoneToName(current.semitone) : "";
+  const fingeringAvailable = instrument.notes.includes(chartNote);
   const isWide = instrument.layout === "wide";
 
   const playScale = () => {
@@ -150,7 +155,7 @@ export const Scales = ({ instrument }: ScalesProps) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {REGISTERS.map((r) => (
+              {SCALE_REGISTERS.map((r) => (
                 <SelectItem key={r} value={r}>
                   {t(`common.registers.${r}`)}
                 </SelectItem>
@@ -267,7 +272,7 @@ export const Scales = ({ instrument }: ScalesProps) => {
           <div className="flex min-h-0 w-full flex-1 items-center justify-center">
             {fingeringAvailable ? (
               <instrument.NoteChart
-                note={current.name}
+                note={chartNote}
                 height={isWide ? 200 : 650}
                 darkMode={darkMode}
               />

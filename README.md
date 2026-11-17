@@ -69,7 +69,6 @@ src/
     theme/                            # ThemeProvider (light/dark)
     i18n/                              # react-i18next config + fr.json
     hooks/                              # useLocalStorage, useNoteSpeechRecognition
-    types/, utils/supabase.ts             # unused scaffolding for a future backend
 ```
 
 ## Architecture
@@ -283,11 +282,6 @@ below) and no login, so data is per-browser/per-device.
 | `srs2-intervals`                          | SRS deck for ear-training intervals                     |
 | `srs2-scales`                               | SRS deck for scales/arpeggios                            |
 | `srs2-fingerings-<instrumentId>`              | SRS deck for fingerings, one per instrument                |
-
-`src/shared/utils/supabase.ts` and `src/shared/types/index.ts` set up a
-Supabase client and DB-row types (there's a matching migration under
-`supabase/migrations/`), but neither is imported anywhere yet — they're
-scaffolding for a possible future backend, not part of the current app.
 
 ## Deployment (GitHub Pages)
 
