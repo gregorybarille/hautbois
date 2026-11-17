@@ -12,6 +12,7 @@ import {
 import { useTheme } from "@/shared/theme/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { MusicScore } from "@/shared/components/music/MusicScore";
+import { REGISTERS, Register, withRegister } from "@/shared/music/notes";
 import {
   SCALE_ROOTS,
   SCALE_TYPES,
@@ -38,19 +39,33 @@ export const Scales = ({ instrument }: ScalesProps) => {
 
   const [root, setRoot] = useState<string>("Do");
   const [type, setType] = useState<ScaleTypeId>("major");
+  const [register, setRegister] = useState<Register>("middle");
   const [index, setIndex] = useState(0);
   const [reviewed, setReviewed] = useState(false);
 
   // Reset per-scale state in the same event as the selection, so no render
   // ever sees a cursor pointing into the previous scale.
-  const selectScale = (nextRoot: string, nextType: ScaleTypeId) => {
+  const selectScale = (
+    nextRoot: string,
+    nextType: ScaleTypeId,
+    nextRegister: Register = register,
+  ) => {
     setRoot(nextRoot);
     setType(nextType);
+    setRegister(nextRegister);
     setIndex(0);
     setReviewed(false);
   };
 
-  const scale = useMemo(() => generateScale(root, type), [root, type]);
+  const effectiveRoot = useMemo(
+    () => withRegister(root, register),
+    [root, register],
+  );
+
+  const scale = useMemo(
+    () => generateScale(effectiveRoot, type),
+    [effectiveRoot, type],
+  );
   const noteNames = useMemo(() => scale.map((n) => n.name), [scale]);
 
   const current = scale[index];
@@ -72,7 +87,7 @@ export const Scales = ({ instrument }: ScalesProps) => {
   };
 
   const markReviewed = (known: boolean) => {
-    review(DECK.scales, scaleCardId(root, type), known);
+    review(DECK.scales, scaleCardId(effectiveRoot, type), known);
     setReviewed(true);
   };
 
@@ -117,6 +132,27 @@ export const Scales = ({ instrument }: ScalesProps) => {
               {SCALE_TYPES.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
                   {t(s.labelKey)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("common.register")}
+          </span>
+          <Select
+            value={register}
+            onValueChange={(v) => selectScale(root, type, v as Register)}
+          >
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {REGISTERS.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {t(`common.registers.${r}`)}
                 </SelectItem>
               ))}
             </SelectContent>

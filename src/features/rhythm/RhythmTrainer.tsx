@@ -4,19 +4,16 @@ import { Play, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/shared/theme/ThemeProvider";
+import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { isAudioSupported, playClick } from "@/shared/audio/synth";
 import { recordSession } from "@/shared/progress/history";
+import { RhythmNotation } from "@/shared/components/music/RhythmNotation";
 import {
   BEATS_PER_BAR,
-  Difficulty,
+  RHYTHM_CELL_TYPES,
+  RHYTHM_CELL_TYPE_IDS,
   RhythmPattern,
   generatePattern,
 } from "@/shared/music/rhythm";
@@ -37,7 +34,6 @@ interface Result {
   perOnset: OnsetResult[];
 }
 
-const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const SUBSLOTS = 4; // sixteenth grid per beat
 // Taps are accepted slightly outside the recording bar, so an anticipated
 // downbeat or a late final off-beat still lands inside the scoring tolerance
@@ -46,12 +42,20 @@ const TAP_WINDOW_PAD_MS = 250;
 
 export const RhythmTrainer = () => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const darkMode = theme === "dark";
   const audioOk = isAudioSupported();
 
   const [bpm, setBpm] = useState(80);
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  // Which rhythmic cell types (quarter/eighths/sixteenths/...) are in play.
+  const [enabledCellIds, setEnabledCellIds] = useLocalStorage<string[]>(
+    "rhythm-enabled-cells",
+    RHYTHM_CELL_TYPE_IDS,
+  );
+  const activeCellIds =
+    enabledCellIds.length > 0 ? enabledCellIds : RHYTHM_CELL_TYPE_IDS;
   const [pattern, setPattern] = useState<RhythmPattern>(() =>
-    generatePattern("easy"),
+    generatePattern(activeCellIds),
   );
   const [phase, setPhase] = useState<Phase>("idle");
   const [countBeat, setCountBeat] = useState(0);
@@ -183,13 +187,23 @@ export const RhythmTrainer = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [phase, tap]);
 
-  const newPattern = (d: Difficulty = difficulty) => {
+  const newPattern = (cellIds: string[] = activeCellIds) => {
     clearTimers();
     accepting.current = false;
     setPhase("idle");
     setResult(null);
     setActiveBeat(null);
-    setPattern(generatePattern(d));
+    setPattern(generatePattern(cellIds));
+  };
+
+  const toggleCellType = (id: string) => {
+    const has = activeCellIds.includes(id);
+    if (has && activeCellIds.length === 1) return; // keep at least one enabled
+    const next = has
+      ? activeCellIds.filter((x) => x !== id)
+      : [...activeCellIds, id];
+    setEnabledCellIds(next);
+    if (!running) newPattern(next);
   };
 
   const onsetStatus = (onset: number): "hit" | "miss" | null => {
@@ -219,33 +233,37 @@ export const RhythmTrainer = () => {
         </Alert>
       )}
 
+      {/* Which rhythmic cell types to practice */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          {t("rhythm.selectTypes")}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {RHYTHM_CELL_TYPES.map((cell) => {
+            const active = activeCellIds.includes(cell.id);
+            return (
+              <button
+                key={cell.id}
+                type="button"
+                aria-pressed={active}
+                disabled={running}
+                onClick={() => toggleCellType(cell.id)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50",
+                  active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted",
+                )}
+              >
+                {t(cell.labelKey)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-wrap items-end gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {t("rhythm.difficulty")}
-          </span>
-          <Select
-            value={difficulty}
-            onValueChange={(v) => {
-              const d = v as Difficulty;
-              setDifficulty(d);
-              newPattern(d);
-            }}
-          >
-            <SelectTrigger className="w-40" disabled={running}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DIFFICULTIES.map((d) => (
-                <SelectItem key={d} value={d}>
-                  {t(`rhythm.levels.${d}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </label>
-
         <label className="flex flex-1 flex-col gap-1">
           <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             {t("rhythm.tempo")} — {bpm} BPM
@@ -261,6 +279,16 @@ export const RhythmTrainer = () => {
             className="h-2 w-full cursor-pointer accent-primary disabled:opacity-50"
           />
         </label>
+      </div>
+
+      {/* Rhythmic notation */}
+      <div className="overflow-x-auto rounded-2xl border border-border bg-slate-50 p-2 dark:bg-slate-900">
+        <RhythmNotation
+          pattern={pattern}
+          activeBeat={activeBeat}
+          onsetStatus={onsetStatus}
+          darkMode={darkMode}
+        />
       </div>
 
       {/* Pattern display */}

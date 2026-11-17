@@ -67,6 +67,7 @@
     "skip": "Passer",
     "noAudioTitle": "Audio non disponible",
     "noAudio": "Votre navigateur ne supporte pas la synthèse audio.",
+    "selectIntervals": "Intervalles à pratiquer",
     "intervals": {
       "m2": "Seconde mineure",
       "M2": "Seconde majeure",
@@ -84,11 +85,14 @@
   },
   "rhythm": {
     "instructions": "Écoutez le décompte, puis tapez le rythme affiché (barre d'espace ou zone tactile).",
-    "difficulty": "Difficulté",
-    "levels": {
-      "easy": "Facile",
-      "medium": "Moyen",
-      "hard": "Difficile"
+    "selectTypes": "Types de rythme à pratiquer",
+    "cellTypes": {
+      "quarter": "Noire",
+      "rest": "Silence",
+      "eighths": "Croches",
+      "offbeat": "Contretemps",
+      "sixteenths": "Doubles-croches",
+      "dotted": "Pointée"
     },
     "tempo": "Tempo",
     "tapHere": "TAP",
@@ -159,7 +163,13 @@
     "next": "Suivant",
     "previous": "Précédent",
     "start": "Commencer",
-    "finish": "Terminer"
+    "finish": "Terminer",
+    "register": "Hauteur",
+    "registers": {
+      "grave": "Grave",
+      "middle": "Moyen",
+      "aigu": "Aigu"
+    }
   },
   "theme": {
     "switchToDark": "Passer en mode sombre",

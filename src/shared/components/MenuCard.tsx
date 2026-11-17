@@ -21,8 +21,8 @@ export const MenuCard = ({
       className="group text-left focus:outline-none"
     >
       <Card className="h-full items-center gap-4 p-6 text-center transition-colors duration-200 group-hover:border-primary/40 group-hover:bg-muted/40 group-focus-visible:border-primary group-focus-visible:ring-3 group-focus-visible:ring-ring/50 sm:p-8">
-        <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-          <Icon className="size-8" />
+        <span className="flex size-16 items-center justify-center text-primary">
+          <Icon className="size-10" />
         </span>
         <h2 className="text-xl font-semibold text-foreground">{title}</h2>
         <p className="text-sm text-muted-foreground">{description}</p>
